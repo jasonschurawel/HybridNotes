@@ -7,8 +7,6 @@ interface InteractiveReviewProps {
   originalText: string
   improvedText: string
   apiKey: string
-  onTextUpdated: (newText: string) => void
-  onComplete?: () => void
   currentEditorText?: string
   onIterationProposed?: (result: { newText: string; changes: string[] }) => void // New prop for proposing changes
 }
@@ -17,8 +15,6 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
   originalText,
   improvedText,
   apiKey,
-  onTextUpdated,
-  onComplete,
   currentEditorText,
   onIterationProposed
 }) => {

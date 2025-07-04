@@ -223,7 +223,6 @@ function App() {
               improvedText={improvedText}
               currentEditorText={improvedText}
               apiKey={apiKey}
-              onTextUpdated={handleTextChange}
               onIterationProposed={handleIterationProposed}
             />
           </div>
