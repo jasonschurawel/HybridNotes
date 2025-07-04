@@ -34,7 +34,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "file-saver": "^2.0.5",
-    "pdfjs-dist": "^5.3.31",
+    "pdfjs-dist": "^4.0.379",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import type { TextItem, TextMarkedContent } from 'pdfjs-dist/types/src/display/api'
 
-// Completely disable PDF.js worker - use empty data URL to prevent external loading
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'data:application/javascript;base64,'
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `${import.meta.env.BASE_URL}pdf.worker.min.mjs`
 
 export const extractTextFromPDF = async (file: File): Promise<string> => {
   try {

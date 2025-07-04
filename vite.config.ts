@@ -9,11 +9,18 @@ export default defineConfig(({ command }) => ({
     global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['pdfjs-dist']
+    include: ['pdfjs-dist'],
+    esbuildOptions: {
+      target: 'esnext'
+    }
   },
   build: {
+    target: 'esnext',
     rollupOptions: {
       external: []
     }
+  },
+  esbuild: {
+    target: 'esnext'
   }
 }))
