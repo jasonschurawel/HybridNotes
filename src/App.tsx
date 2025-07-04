@@ -173,6 +173,36 @@ function App() {
 
   const handleIterationProposed = (result: { newText: string; changes: string[] }) => {
     setProposedIteration(result)
+    
+    // Auto-scroll up when iteration is proposed to show the changes
+    // Use multiple techniques to ensure scroll happens
+    setTimeout(() => {
+      // Scroll the page to top with smooth behavior
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      
+      // Also try immediate scroll without smooth behavior as backup
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+      }, 100)
+      
+      // Scroll any main content containers
+      const mainContent = document.querySelector('.main-content.review')
+      if (mainContent) {
+        mainContent.scrollTop = 0
+      }
+      
+      // Scroll the PDF split view container
+      const pdfSplitView = document.querySelector('.pdf-split-view')
+      if (pdfSplitView) {
+        pdfSplitView.scrollTop = 0
+      }
+      
+      // Scroll any text panel containers
+      const textPanel = document.querySelector('.text-panel .panel-content')
+      if (textPanel) {
+        textPanel.scrollTop = 0
+      }
+    }, 50)
   }
 
   const handleIterationAccepted = () => {
@@ -208,6 +238,7 @@ function App() {
           <PDFSplitView 
             file={uploadedFile}
             enhancedText={improvedText}
+            originalText={originalText}
             fileName={fileName}
             onTextChange={handleTextChange}
             disabled={false}
@@ -215,6 +246,7 @@ function App() {
             proposedIteration={proposedIteration}
             onIterationAccepted={handleIterationAccepted}
             onIterationRejected={handleIterationRejected}
+            selectedLanguage={selectedLanguage}
           />
           
           <div className="ai-review-wrapper">

@@ -133,6 +133,7 @@
   justify-content: center;
   align-items: flex-start;
   background-color: var(--md-sys-color-surface-variant);
+  min-height: 100%;
 }
 
 .pdf-canvas {
@@ -141,6 +142,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: var(--md-sys-shape-corner-small);
   background-color: white;
+  margin-bottom: 16px; /* Add margin at the bottom to prevent cutting off */
 }
 
 .pdf-loading {

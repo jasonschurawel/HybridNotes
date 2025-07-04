@@ -387,16 +387,19 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  height: 1200px;
+  height: auto;
+  min-height: 600px;
 }
 
 @media (max-width: 768px) {
   .ai-review-wrapper {
-    margin-top: 1.5rem;
-    margin-bottom: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     border-radius: 8px;
-    margin-left: 1rem;
-    margin-right: 1rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    min-height: 500px;
   }
 }
 

@@ -34,8 +34,12 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
   }, [apiKey, originalText, improvedText])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [conversation?.messages, isLoading, isIterating])
+    // Only auto-scroll to messages end when there are new messages or loading, 
+    // but not when iteration is happening (to avoid unwanted scroll down)
+    if (!isIterating) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [conversation?.messages, isLoading])
 
   const startReview = async () => {
     if (!agent) return
@@ -78,6 +82,11 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
     if (!agent || !currentEditorText || !onIterationProposed) return
     
     setIsIterating(true)
+    
+    // Immediate scroll up when starting iteration to counteract any unwanted scrolling
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, 10)
     
     try {
       const result = await agent.iterateOnText(currentEditorText)

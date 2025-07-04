@@ -18,6 +18,7 @@ interface ProcessingState {
 const PDFTranscriber: React.FC = () => {
   const [apiKey, setApiKey] = useState<string>('')
   const [improvedText, setImprovedText] = useState<string>('')
+  const [originalText, setOriginalText] = useState<string>('')
   const [fileName, setFileName] = useState<string>('')
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('english')
@@ -31,6 +32,7 @@ const PDFTranscriber: React.FC = () => {
     setFileName(file.name)
     setUploadedFile(file)
     setImprovedText('') // Clear previous improved text
+    setOriginalText('') // Clear previous original text
     setProcessing({ processing: false, error: null })
   }
 
@@ -60,6 +62,7 @@ const PDFTranscriber: React.FC = () => {
     try {
       const result = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage)
       setImprovedText(result.improvedText)
+      setOriginalText(result.originalText)
     } catch (error: unknown) {
       setProcessing({ 
         processing: false,
@@ -147,6 +150,7 @@ const PDFTranscriber: React.FC = () => {
           <PDFSplitView 
             file={uploadedFile}
             enhancedText={improvedText}
+            originalText={originalText}
             fileName={fileName}
             onTextChange={handleTextChange}
             disabled={processing.processing}
