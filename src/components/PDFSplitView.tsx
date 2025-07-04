@@ -9,6 +9,7 @@ interface PDFSplitViewProps {
   fileName: string
   onTextChange: (text: string) => void
   disabled?: boolean
+  onFileSaved?: () => void // Add callback for when file is saved
 }
 
 const PDFSplitView: React.FC<PDFSplitViewProps> = ({ 
@@ -16,7 +17,8 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
   enhancedText, 
   fileName,
   onTextChange,
-  disabled = false
+  disabled = false,
+  onFileSaved
 }) => {
   const [editableText, setEditableText] = useState(enhancedText)
 
@@ -52,6 +54,7 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
           text={editableText}
           originalFileName={fileName}
           disabled={disabled}
+          onFileSaved={onFileSaved}
         />
       </div>
       

@@ -291,15 +291,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🎉 **Acknowledgments**
-
-- **Google** for the powerful Gemini API
-- **Mozilla** for the excellent PDF.js library
-- **React & TypeScript communities** for amazing development tools
-- **Contributors** who help improve HybridNotes
-
----
-
 ## 🔮 **Future Roadmap**
 
 - [ ] **Iterative refinement of transscribed notes** based on human in the loop feedback

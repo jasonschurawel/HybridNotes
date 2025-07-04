@@ -1,0 +1,150 @@
+/* Material Dialog Component */
+.material-dialog {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+  box-shadow: var(--md-sys-elevation-3);
+  backdrop-filter: blur(8px);
+  max-height: 80vh;
+  max-width: 90vw;
+  width: 100%;
+  overflow: hidden;
+}
+
+.material-dialog.sm {
+  max-width: 400px;
+}
+
+.material-dialog.md {
+  max-width: 600px;
+}
+
+.material-dialog.lg {
+  max-width: 800px;
+}
+
+.material-dialog.xl {
+  max-width: 1200px;
+}
+
+.material-dialog.fullscreen {
+  max-width: 95vw;
+  max-height: 95vh;
+  width: 95vw;
+  height: 95vh;
+}
+
+.material-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 200px;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
+}
+
+.dialog-title {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.375rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.4;
+}
+
+.dialog-close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.dialog-close-button:hover {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.dialog-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+}
+
+.dialog-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dialog-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dialog-content::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline-variant);
+  border-radius: 4px;
+}
+
+.dialog-content::-webkit-scrollbar-thumb:hover {
+  background: var(--md-sys-color-outline);
+}
+
+/* Animation */
+.material-dialog {
+  animation: dialog-enter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .material-dialog:not(.fullscreen) {
+    max-width: 95vw;
+    max-height: 90vh;
+    margin: 5vh auto;
+  }
+  
+  .dialog-header {
+    padding: 16px 16px 12px 16px;
+  }
+  
+  .dialog-content {
+    padding: 16px;
+  }
+  
+  .dialog-title {
+    font-size: 1.25rem;
+  }
+}

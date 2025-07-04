@@ -1,0 +1,84 @@
+.app {
+  min-height: 100vh;
+  background-color: var(--md-sys-color-background);
+  padding: 0;
+  margin: 0;
+  transition: background-color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+.app-header {
+  background-color: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding: 32px 16px;
+  text-align: center;
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+.app-header h1 {
+  margin: 0 0 8px 0;
+  font-family: var(--md-sys-typescale-display-medium-font);
+  font-size: var(--md-sys-typescale-display-medium-size);
+  font-weight: var(--md-sys-typescale-display-medium-weight);
+  line-height: var(--md-sys-typescale-display-medium-line-height);
+  color: var(--md-sys-color-primary);
+  transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+.app-header p {
+  margin: 0;
+  font-family: var(--md-sys-typescale-title-medium-font);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  line-height: var(--md-sys-typescale-title-medium-line-height);
+  color: var(--md-sys-color-on-surface-variant);
+  transition: color var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+.app-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px;
+  gap: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 24px 16px;
+  }
+  
+  .app-header h1 {
+    font-size: var(--md-sys-typescale-headline-large-size);
+    line-height: var(--md-sys-typescale-headline-large-line-height);
+  }
+  
+  .app-header p {
+    font-size: var(--md-sys-typescale-body-large-size);
+    line-height: var(--md-sys-typescale-body-large-line-height);
+  }
+  
+  .app-main {
+    padding: 16px 8px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 16px 12px;
+  }
+  
+  .app-header h1 {
+    font-size: var(--md-sys-typescale-headline-medium-size);
+    line-height: var(--md-sys-typescale-headline-medium-line-height);
+  }
+  
+  .app-main {
+    padding: 12px 6px;
+    gap: 12px;
+  }
+}
+  }
+}

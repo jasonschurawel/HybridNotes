@@ -60,8 +60,7 @@ const fileToGenerativePart = async (file: File) => {
 export const improvePDFWithGemini = async (
   pdfFile: File, 
   apiKey: string,
-  language: Language = 'english',
-  additionalNotes: string = ''
+  language: Language = 'english'
 ): Promise<string> => {
   try {
     if (!apiKey.trim()) {
@@ -84,16 +83,11 @@ export const improvePDFWithGemini = async (
     // Load the job prompt
     const jobPrompt = await loadJobPrompt(language)
     
-    // Add additional user context if provided
-    const fullPrompt = additionalNotes.trim() 
-      ? `${jobPrompt}\n\nADDITIONAL USER INSTRUCTIONS:\n${additionalNotes.trim()}\n\nPlease incorporate these specific requirements into your improvement process.`
-      : jobPrompt
-    
     // Convert PDF to the format Gemini expects
     const pdfPart = await fileToGenerativePart(pdfFile)
 
     // Generate improved content with PDF and prompt
-    const result = await model.generateContent([fullPrompt, pdfPart])
+    const result = await model.generateContent([jobPrompt, pdfPart])
     const response = await result.response
     const improvedText = response.text()
 

@@ -6,14 +6,17 @@ interface SaveOptionsProps {
   text: string
   originalFileName: string
   disabled?: boolean
+  onFileSaved?: () => void // Callback when file is saved
 }
 
 const SaveOptions: React.FC<SaveOptionsProps> = ({
   text,
   originalFileName,
-  disabled = false
+  disabled = false,
+  onFileSaved
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [lastSaved, setLastSaved] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close menu when clicking outside
@@ -34,16 +37,58 @@ const SaveOptions: React.FC<SaveOptionsProps> = ({
     return fileName.replace(/\.pdf$/i, '')
   }
 
+  // Enhanced save function with File System Access API support
+  const saveFileAdvanced = async (content: string, filename: string, mimeType: string) => {
+    try {
+      // Check if File System Access API is supported
+      if ('showSaveFilePicker' in window) {
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: filename,
+          types: [{
+            description: 'Text files',
+            accept: {
+              [mimeType]: [`.${filename.split('.').pop()}`]
+            }
+          }]
+        })
+        
+        const writable = await fileHandle.createWritable()
+        await writable.write(content)
+        await writable.close()
+        
+        setLastSaved(filename)
+        return true
+      } else {
+        // Fallback to regular download
+        const blob = new Blob([content], { type: `${mimeType};charset=utf-8` })
+        saveAs(blob, filename)
+        setLastSaved(filename)
+        return true
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error('Failed to save file:', error)
+        // Fallback to regular download on error
+        const blob = new Blob([content], { type: `${mimeType};charset=utf-8` })
+        saveAs(blob, filename)
+        setLastSaved(filename)
+      }
+      return false
+    }
+  }
+
   const saveOptions = [
     {
       id: 'txt',
       label: 'Save as .txt',
       icon: '📄',
       description: 'Plain text format',
-      action: () => {
+      action: async () => {
         const baseFileName = getBaseFileName(originalFileName)
-        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
-        saveAs(blob, `${baseFileName}_improved.txt`)
+        const success = await saveFileAdvanced(text, `${baseFileName}_improved.txt`, 'text/plain')
+        if (success && onFileSaved) {
+          onFileSaved()
+        }
       }
     },
     {
@@ -51,36 +96,42 @@ const SaveOptions: React.FC<SaveOptionsProps> = ({
       label: 'Save as .md',
       icon: '📝',
       description: 'Markdown format',
-      action: () => {
+      action: async () => {
         const baseFileName = getBaseFileName(originalFileName)
-        const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' })
-        saveAs(blob, `${baseFileName}_improved.md`)
+        const success = await saveFileAdvanced(text, `${baseFileName}.md`, 'text/markdown')
+        if (success && onFileSaved) {
+          onFileSaved()
+        }
       }
     },
     {
-      id: 'mirror',
-      label: 'Mirror .pdf with .md',
-      icon: '🔄',
-      description: 'Same name as PDF',
-      action: () => {
-        const baseFileName = getBaseFileName(originalFileName)
-        const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' })
-        saveAs(blob, `${baseFileName}.md`)
+      id: 'copy',
+      label: 'Copy to clipboard',
+      icon: '📋',
+      description: 'Copy enhanced text',
+      action: async () => {
+        try {
+          await navigator.clipboard.writeText(text)
+          setLastSaved('Copied to clipboard')
+          setTimeout(() => setLastSaved(null), 3000)
+        } catch (error) {
+          console.error('Failed to copy to clipboard:', error)
+        }
       }
     }
   ]
 
-  const handleMainAction = () => {
+  const handleMainAction = async () => {
     // Default action is save as .md
-    saveOptions[1].action()
+    await saveOptions[1].action()
   }
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen)
   }
 
-  const handleOptionSelect = (option: typeof saveOptions[0]) => {
-    option.action()
+  const handleOptionSelect = async (option: typeof saveOptions[0]) => {
+    await option.action()
     setIsMenuOpen(false)
   }
 
@@ -90,15 +141,21 @@ const SaveOptions: React.FC<SaveOptionsProps> = ({
 
   return (
     <div className="save-options" ref={menuRef}>
+      {lastSaved && (
+        <div className="save-notification">
+          ✅ {lastSaved}
+        </div>
+      )}
+      
       <div className="split-button" role="group" aria-label="Save options">
         <button
           className="md-button md-button-filled split-button-main"
           onClick={handleMainAction}
           disabled={disabled}
-          title="Save as Markdown file"
+          title="Save at same location as PDF"
         >
-          <span className="button-icon">📝</span>
-          <span className="button-text">Save as .md</span>
+          <span className="button-icon">🔄</span>
+          <span className="button-text">Mirror PDF</span>
         </button>
         
         <button
