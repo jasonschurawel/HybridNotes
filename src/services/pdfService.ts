@@ -1,13 +1,17 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import type { TextItem, TextMarkedContent } from 'pdfjs-dist/types/src/display/api'
 
-// Configure PDF.js worker to use local file from public folder
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+// Disable PDF.js worker completely - run everything in main thread
+pdfjsLib.GlobalWorkerOptions.workerSrc = ''
 
 export const extractTextFromPDF = async (file: File): Promise<string> => {
   try {
     const arrayBuffer = await file.arrayBuffer()
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+    const pdf = await pdfjsLib.getDocument({ 
+      data: arrayBuffer,
+      useWorkerFetch: false,
+      isEvalSupported: false
+    }).promise
     
     let extractedText = ''
     

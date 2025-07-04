@@ -3,8 +3,8 @@ import * as pdfjsLib from 'pdfjs-dist'
 import type { RenderTask } from 'pdfjs-dist/types/src/display/api'
 import './PDFViewer.css'
 
-// Use local worker file from public folder
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+// Disable PDF.js worker completely - run everything in main thread
+pdfjsLib.GlobalWorkerOptions.workerSrc = ''
 
 interface PDFViewerProps {
   file: File
@@ -32,7 +32,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, className = '' }) => {
         const arrayBuffer = await file.arrayBuffer()
         console.log('PDF ArrayBuffer loaded, size:', arrayBuffer.byteLength)
         
-        // Configure for offline use - no worker, no external dependencies
+        // Configure for completely offline use - disable worker, run in main thread
         const loadPromise = pdfjsLib.getDocument({ 
           data: arrayBuffer,
           useWorkerFetch: false,
