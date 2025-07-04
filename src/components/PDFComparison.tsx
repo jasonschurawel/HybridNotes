@@ -32,9 +32,13 @@ const PDFComparison: React.FC<PDFComparisonProps> = ({
         if (onExtractedTextChange) {
           onExtractedTextChange(text)
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error extracting text:', err)
-        setError(err.message || 'Failed to extract text from PDF')
+        if (err instanceof Error) {
+          setError(err.message || 'Failed to extract text from PDF')
+        } else {
+          setError('Failed to extract text from PDF')
+        }
       } finally {
         setLoading(false)
       }

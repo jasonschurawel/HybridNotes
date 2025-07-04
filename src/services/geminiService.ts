@@ -103,20 +103,24 @@ export const improvePDFWithGemini = async (
 
     return improvedText.trim()
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error improving PDF with Gemini:', error)
     
     // Provide more specific error messages
-    if (error.message?.includes('API_KEY_INVALID')) {
-      throw new Error('Invalid API key. Please check your API key.')
-    } else if (error.message?.includes('QUOTA_EXCEEDED')) {
-      throw new Error('API quota exceeded. Please check your Google Cloud billing.')
-    } else if (error.message?.includes('SAFETY')) {
-      throw new Error('Content was blocked for safety reasons. Please try with different text.')
-    } else if (error.message?.includes('PERMISSION_DENIED')) {
-      throw new Error('Permission denied. Please check your API key permissions.')
+    if (error instanceof Error) {
+      if (error.message?.includes('API_KEY_INVALID')) {
+        throw new Error('Invalid API key. Please check your API key.')
+      } else if (error.message?.includes('QUOTA_EXCEEDED')) {
+        throw new Error('API quota exceeded. Please check your Google Cloud billing.')
+      } else if (error.message?.includes('SAFETY')) {
+        throw new Error('Content was blocked for safety reasons. Please try with different text.')
+      } else if (error.message?.includes('PERMISSION_DENIED')) {
+        throw new Error('Permission denied. Please check your API key permissions.')
+      } else {
+        throw new Error(`Failed to improve PDF: ${error.message}`)
+      }
     } else {
-      throw new Error(`Failed to improve PDF: ${error.message || 'Unknown error occurred'}`)
+      throw new Error('Failed to improve PDF: Unknown error occurred')
     }
   }
 }
@@ -157,20 +161,24 @@ export const improveTextWithGemini = async (
 
     return improvedText.trim()
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error improving text with Gemini:', error)
     
     // Provide more specific error messages
-    if (error.message?.includes('API_KEY_INVALID')) {
-      throw new Error('Invalid API key. Please check your API key.')
-    } else if (error.message?.includes('QUOTA_EXCEEDED')) {
-      throw new Error('API quota exceeded. Please check your Google Cloud billing.')
-    } else if (error.message?.includes('SAFETY')) {
-      throw new Error('Content was blocked for safety reasons. Please try with different text.')
-    } else if (error.message?.includes('PERMISSION_DENIED')) {
-      throw new Error('Permission denied. Please check your API key permissions.')
+    if (error instanceof Error) {
+      if (error.message?.includes('API_KEY_INVALID')) {
+        throw new Error('Invalid API key. Please check your API key.')
+      } else if (error.message?.includes('QUOTA_EXCEEDED')) {
+        throw new Error('API quota exceeded. Please check your Google Cloud billing.')
+      } else if (error.message?.includes('SAFETY')) {
+        throw new Error('Content was blocked for safety reasons. Please try with different text.')
+      } else if (error.message?.includes('PERMISSION_DENIED')) {
+        throw new Error('Permission denied. Please check your API key permissions.')
+      } else {
+        throw new Error(`Failed to improve text: ${error.message}`)
+      }
     } else {
-      throw new Error(`Failed to improve text: ${error.message || 'Unknown error occurred'}`)
+      throw new Error('Failed to improve text: Unknown error occurred')
     }
   }
 }

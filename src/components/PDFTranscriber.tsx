@@ -60,10 +60,12 @@ const PDFTranscriber: React.FC = () => {
     try {
       const improved = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage, additionalNotes)
       setImprovedText(improved)
-    } catch (error: any) {
+    } catch (error: unknown) {
       setProcessing({ 
         processing: false,
-        error: error.message || 'Failed to enhance PDF. Please check your API key and try again.' 
+        error: error instanceof Error
+          ? error.message
+          : 'Failed to enhance PDF. Please check your API key and try again.'
       })
       console.error('Gemini API error:', error)
     } finally {

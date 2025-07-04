@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
+import type { RenderTask } from 'pdfjs-dist/types/src/display/api'
 import './PDFViewer.css'
 
 // Use local worker file - no external dependencies
@@ -18,7 +19,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, className = '' }) => {
   const [error, setError] = useState<string | null>(null)
   const [pdf, setPdf] = useState<pdfjsLib.PDFDocumentProxy | null>(null)
   const [scale, setScale] = useState(1.2)
-  const renderTaskRef = useRef<any>(null)
+  const renderTaskRef = useRef<RenderTask | null>(null)
 
   useEffect(() => {
     const loadPDF = async () => {
@@ -52,14 +53,18 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, className = '' }) => {
         setPdf(pdfDoc)
         setTotalPages(pdfDoc.numPages)
         setCurrentPage(1)
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error loading PDF:', err)
-        console.error('Error details:', {
-          name: err.name,
-          message: err.message,
-          stack: err.stack
-        })
-        setError(`Failed to load PDF: ${err.message || 'Unknown error'}`)
+        if (err instanceof Error) {
+          console.error('Error details:', {
+            name: err.name,
+            message: err.message,
+            stack: err.stack
+          })
+          setError(`Failed to load PDF: ${err.message}`)
+        } else {
+          setError('Failed to load PDF')
+        }
       } finally {
         setLoading(false)
       }
@@ -102,9 +107,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, className = '' }) => {
         
         renderTaskRef.current = null
         console.log('Page rendered successfully:', currentPage)
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Don't log errors if the render was cancelled
-        if (err.name !== 'RenderingCancelledException') {
+        if (err instanceof Error && err.name !== 'RenderingCancelledException') {
           console.error('Error rendering page:', err)
           console.error('Render error details:', {
             name: err.name,
@@ -112,7 +117,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, className = '' }) => {
             currentPage,
             totalPages
           })
-          setError(`Failed to render PDF page ${currentPage}: ${err.message || 'Unknown error'}`)
+          setError(`Failed to render PDF page ${currentPage}: ${err.message}`)
         }
       }
     }
