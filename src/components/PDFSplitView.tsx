@@ -206,7 +206,7 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
                 value={proposedIteration && !showDiff ? proposedIteration.newText : editableText}
                 onChange={handleTextChange}
                 placeholder="Enhanced text will appear here..."
-                disabled={disabled || (proposedIteration && !showDiff)}
+                disabled={disabled || (!!proposedIteration && !showDiff)}
                 spellCheck={true}
               />
             )}
