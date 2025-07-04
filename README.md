@@ -2,6 +2,8 @@
 
 **Transform your handwritten PDF notes into structured, enhanced digital knowledge with multilingual support.**
 
+🌐 **[Use it now online](https://jasonschurawel.github.io/HybridNotes)** - No installation required!
+
 HybridNotes is a modern React TypeScript application that bridges the gap between traditional paper note-taking and digital knowledge management. Upload your PDF notes, select your preferred language, and watch them transform into well-structured, searchable digital content that integrates seamlessly into your digital brain workflow.
 
 ---
@@ -44,6 +46,29 @@ Many knowledge workers, students, and researchers face the challenge of converti
 ---
 
 ## 🚀 **Quick Start**
+
+### 🌐 **Use Online (Recommended)**
+
+**Ready to use immediately - no installation required!**
+
+Visit the live application: **[jasonschurawel.github.io/HybridNotes](https://jasonschurawel.github.io/HybridNotes)**
+
+✅ **Instant access** - works directly in your browser  
+✅ **No setup required** - just visit the link and start using  
+✅ **Always up-to-date** - automatically updated with latest features  
+✅ **Cross-platform** - works on Windows, Mac, Linux, mobile devices  
+✅ **Secure** - your files and API key stay in your browser (nothing uploaded to servers)  
+
+Simply:
+1. 🔗 **Visit** [jasonschurawel.github.io/HybridNotes](https://jasonschurawel.github.io/HybridNotes)
+2. 🔑 **Enter your API key** ([Get one here](https://makersuite.google.com/app/apikey))
+3. 📄 **Upload your PDF** and transform your notes!
+
+---
+
+### 🛠️ **Local Development Setup**
+
+Want to modify the code or run it locally? Follow these steps:
 
 ### Prerequisites
 - Node.js (version 18 or higher)
@@ -263,6 +288,43 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
    - Browser and OS information
    - Error messages from console
    - Steps to reproduce the problem
+
+---
+
+## 🚀 **Deployment**
+
+### **GitHub Pages (Automatic)**
+
+HybridNotes is configured for automatic deployment to GitHub Pages:
+
+1. **Fork or Clone** this repository to your GitHub account
+2. **Enable GitHub Pages** in repository Settings → Pages → Source: GitHub Actions
+3. **Push to main branch** - automatic deployment will trigger
+4. **Access your app** at `https://yourusername.github.io/repository-name/`
+
+The GitHub Actions workflow automatically:
+- ✅ Builds the application
+- ✅ Runs tests and linting
+- ✅ Deploys to GitHub Pages
+- ✅ Uses latest action versions (no deprecated dependencies)
+
+### **Local Build**
+
+For manual deployment to other platforms:
+
+```bash
+npm run build
+# Built files will be in dist/ directory
+```
+
+### **Custom Domain**
+
+To use a custom domain with GitHub Pages:
+1. Add a `CNAME` file to the `public/` directory
+2. Configure DNS settings
+3. Update base path in `vite.config.ts`
+
+📖 **Detailed deployment instructions**: See [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ---
 

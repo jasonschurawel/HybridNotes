@@ -4,11 +4,13 @@ import './TextPreview.css'
 interface TextPreviewProps {
   text: string
   placeholder?: string
+  className?: string
 }
 
 const TextPreview: React.FC<TextPreviewProps> = ({ 
   text, 
-  placeholder = "Text will appear here..." 
+  placeholder = "Text will appear here...",
+  className = "" 
 }) => {
   const formatText = (rawText: string) => {
     // Basic formatting for better readability
@@ -29,7 +31,7 @@ const TextPreview: React.FC<TextPreviewProps> = ({
   }
 
   return (
-    <div className="text-preview">
+    <div className={`text-preview ${className}`}>
       <div className="preview-header">
         <div className="text-stats">
           {text && (
