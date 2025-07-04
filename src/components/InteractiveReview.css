@@ -1,11 +1,396 @@
+/* Enhanced Interactive Review Styles */
 .interactive-review-container {
-  height: 93vh; /* Changed from 1400px */
-  max-height: 1600px; /* Added for responsiveness */
+  height: auto;
+  min-height: 95vh;
+  max-height: none;
   display: flex;
   flex-direction: column;
   background: #fafafa;
   border-radius: 12px;
   overflow: hidden;
+  max-width: 1800px;
+  width: 95%;
+  margin: 0 auto;
+}
+
+/* Review Loading State */
+.review-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+}
+
+.review-loading p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Intro Phase Cards */
+.intro-phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.phase-card {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.phase-card:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.phase-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.phase-card h4 {
+  margin: 0 0 0.5rem 0;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.phase-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Review Header */
+.review-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.review-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.main-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.main-tab-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.main-tab-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.main-tab-btn.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Review Content */
+.review-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+/* Segmented Control for Phases */
+.phase-segmented-control {
+  padding: 2rem 4rem 1.5rem 4rem;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.segmented-buttons {
+  display: inline-flex;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.segment-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.segment-btn:hover:not(.active) {
+  background: rgba(102, 126, 234, 0.1);
+  color: #333;
+}
+
+.segment-btn.active {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+/* Questions Container */
+.questions-container {
+  flex: 1;
+  padding: 3rem 4rem;
+}
+
+.phase-header h4 {
+  margin: 0 0 0.5rem 0;
+  padding-top: 1rem;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.phase-header p {
+  margin: 0 0 2rem 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.question-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.question-label {
+  font-weight: 500;
+  color: #333;
+  font-size: 1rem;
+}
+
+.required {
+  color: #f44336;
+  margin-left: 0.25rem;
+}
+
+/* Form Controls */
+.question-select,
+.question-textarea {
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.question-select:focus,
+.question-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.question-multiselect {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;
+  transform: scale(1.1);
+}
+
+.phase-actions {
+  text-align: center;
+}
+
+.submit-phase-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-phase-btn:hover:not(:disabled) {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.submit-phase-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Theory Content */
+.theory-content {
+  flex: 1;
+  background: white;
+  padding: 3rem 4rem;
+}
+
+.theory-header h4 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.theory-header p {
+  margin: 0 0 2rem 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.theory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.no-theory {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-style: italic;
+}
+
+.theory-statement {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e8f4f8 100%);
+  border: 2px solid #b3e0ff;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.theory-statement:hover {
+  border-color: #667eea;
+  transform: translateY(-1px);
+}
+
+.statement-content {
+  flex: 1;
+}
+
+.statement-category {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.statement-text {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.statement-confidence {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+.remove-statement-btn {
+  background: #f44336;
+  border: none;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.remove-statement-btn:hover {
+  background: #d32f2f;
+  transform: scale(1.1);
+}
+
+.theory-actions {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.apply-theory-btn {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto;
+}
+
+.apply-theory-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.apply-theory-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .review-intro {
@@ -456,7 +841,219 @@
   overflow-y: auto;
 }
 
-/* Mobile responsiveness */
+/* Question Progress */
+.question-progress {
+  margin-bottom: 2rem;
+}
+
+.progress-indicator {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #667eea;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e0e7ff;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Current Question */
+.current-question {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.question-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.nav-btn, .action-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.action-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.skip-btn {
+  background: #f59e0b;
+}
+
+.skip-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Phase Complete */
+.phase-complete {
+  text-align: center;
+  padding: 2rem;
+  background: #f0fdf4;
+  border: 2px solid #16a34a;
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.completion-message h5 {
+  margin: 0 0 1rem 0;
+  color: #16a34a;
+  font-size: 1.2rem;
+}
+
+.completion-message p {
+  margin: 0;
+  color: #166534;
+}
+
+/* Question Buttons */
+.question-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.option-btn {
+  padding: 1rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.option-btn:hover {
+  border-color: #667eea;
+  background: #f8faff;
+  transform: translateY(-1px);
+}
+
+.option-btn.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 500;
+}
+
+.question-buttons.multiselect .option-btn.selected {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  border-color: #16a34a;
+}
+
+/* Text Question Container */
+.text-question-container {
+  margin-top: 1rem;
+}
+
+.generating-suggestions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f8faff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.suggestions-label {
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.custom-input-btn, .back-to-suggestions-btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #f59e0b;
+  background: white;
+  color: #f59e0b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+}
+
+.custom-input-btn:hover, .back-to-suggestions-btn:hover {
+  background: #f59e0b;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.custom-input-section {
+  margin-top: 1rem;
+}
+
+.custom-input-section .question-textarea {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .interactive-review-container {
     height: auto;
@@ -470,6 +1067,132 @@
     min-height: 200px;
   }
 
+  .intro-phases {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .phase-card {
+    padding: 1rem;
+  }
+
+  .phase-card h4 {
+    font-size: 1rem;
+  }
+
+  .phase-card p {
+    font-size: 0.85rem;
+  }
+
+  .review-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .review-header h3 {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .main-tabs {
+    justify-content: center;
+  }
+
+  .main-tab-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .phase-segmented-control {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .segmented-buttons {
+    display: flex;
+    width: 100%;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 2px;
+  }
+
+  .segment-btn {
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.8rem;
+  }
+
+  .questions-container {
+    padding: 1rem;
+  }
+
+  .phase-header h4 {
+    font-size: 1.1rem;
+  }
+
+  .questions-list {
+    gap: 1.5rem;
+  }
+
+  .question-label {
+    font-size: 0.9rem;
+  }
+
+  .question-select,
+  .question-textarea {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+
+  .question-multiselect {
+    padding: 0.625rem;
+  }
+
+  .checkbox-label {
+    font-size: 0.9rem;
+  }
+
+  .submit-phase-btn {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .theory-content {
+    padding: 1rem;
+  }
+
+  .theory-header h4 {
+    font-size: 1.1rem;
+  }
+
+  .theory-statement {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .statement-text {
+    font-size: 0.9rem;
+  }
+
+  .statement-confidence {
+    font-size: 0.8rem;
+  }
+
+  .remove-statement-btn {
+    align-self: flex-end;
+    font-size: 0.8rem;
+  }
+
+  .apply-theory-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
   .review-intro h3 {
     font-size: 1.25rem;
   }
@@ -478,102 +1201,13 @@
     font-size: 0.9rem;
   }
 
-  .conversation-header {
-    padding: 1rem;
-    height: auto;
-    min-height: 50px;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
-  }
-
-  .conversation-header h3 {
-    font-size: 1.1rem;
-  }
-
-  .phase-indicator {
-    font-size: 0.8rem;
-  }
-
-  .messages {
-    padding: 1rem;
-  }
-
-  .message {
-    max-width: 95%;
-  }
-
-  .message-content {
-    padding: 0.75rem;
-    font-size: 0.9rem;
-  }
-
-  .input-area {
-    padding: 1rem;
-    height: auto;
-    min-height: 140px;
-  }
-
-  .input-container {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .input-container textarea {
-    height: 60px;
-    font-size: 0.9rem;
-  }
-
-  .send-btn {
-    align-self: flex-end;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.9rem;
-  }
-
-  .iteration-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .iteration-actions {
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .apply-btn,
-  .discard-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-  }
-
-  .iteration-result {
-    margin-top: 1rem;
-    padding: 1rem;
-  }
-
-  .changes-list h5,
-  .text-preview h5 {
-    font-size: 0.9rem;
-  }
-
-  .preview-text {
-    font-size: 0.85rem;
-    max-height: 150px;
-  }
-
   .start-review-btn {
     padding: 0.75rem 1.5rem;
     font-size: 0.9rem;
   }
 
-  .finish-btn {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.9rem;
-  }
-
-  .iterate-btn {
-    padding: 0.625rem 1.25rem;
+  .option-btn {
+    padding: 0.875rem 1rem;
     font-size: 0.9rem;
   }
 }
@@ -583,64 +1217,55 @@
     border-radius: 8px;
   }
 
-  .review-intro {
-    padding: 1.5rem 0.75rem;
-    height: auto;
-    min-height: 180px;
+  .review-header {
+    padding: 0.75rem;
   }
 
-  .review-intro h3 {
+  .review-header h3 {
     font-size: 1.1rem;
   }
 
-  .review-intro p {
-    font-size: 0.85rem;
-  }
-
-  .conversation-header {
-    padding: 0.75rem;
-  }
-
-  .messages {
-    padding: 0.75rem;
-    gap: 0.75rem;
-  }
-
-  .message-content {
-    padding: 0.625rem;
-    font-size: 0.85rem;
-  }
-
-  .input-area {
-    padding: 0.75rem;
-  }
-
-  .input-container textarea {
-    height: 50px;
-    padding: 0.75rem;
-    font-size: 0.85rem;
-  }
-
-  .send-btn {
-    padding: 0.625rem 1rem;
-    font-size: 0.85rem;
-    min-width: 70px;
-  }
-
-  .iteration-result {
-    padding: 0.75rem;
-  }
-
-  .apply-btn,
-  .discard-btn {
+  .main-tab-btn {
     padding: 0.375rem 0.625rem;
-    font-size: 0.8rem;
-    min-width: 60px;
+    font-size: 0.85rem;
   }
 
-  .preview-text {
-    font-size: 0.8rem;
-    max-height: 120px;
+  .segment-btn {
+    padding: 0.375rem 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .phase-segmented-control {
     padding: 0.75rem;
+  }
+
+  .questions-container {
+    padding: 0.75rem;
+  }
+
+  .theory-content {
+    padding: 0.75rem;
+  }
+
+  .theory-statement {
+    padding: 0.75rem;
+  }
+
+  .apply-theory-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.85rem;
+  }
+
+  .intro-phases {
+    margin: 1rem 0;
+  }
+
+  .phase-card {
+    padding: 0.75rem;
+  }
+
+  .start-review-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.85rem;
   }
 }

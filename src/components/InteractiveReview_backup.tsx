@@ -198,24 +198,18 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
 
     setIsGeneratingSuggestions(true)
     try {
-      // Include more context from the original transcribed notes
-      const originalTextPreview = originalText.substring(0, 2000) // Use more content for better context
-      
-      const prompt = `Based on the following transcribed PDF content and the question, generate 4-5 relevant, specific answer options that would be appropriate for these particular notes.
-
-ORIGINAL TRANSCRIBED CONTENT:
-"${originalTextPreview}${originalText.length > 2000 ? '...[content continues]' : ''}"
-
-QUESTION: ${question.question}
-
-Analyze the content above and provide contextual, specific answers that make sense for this particular document. Generate answers based on what you can understand from the actual transcribed content.
+      // Use the agent's AI to generate contextual suggestions
+      const prompt = `Based on the PDF content and the question "${question.question}", generate 4-5 relevant, specific answer options that would be appropriate for this user's notes. 
 
 IMPORTANT: Return ONLY a valid JSON array of strings. No additional text, no markdown formatting, no explanations.
 
 Example format:
-["Option 1 text", "Option 2 text", "Option 3 text", "Option 4 text"]`
+["Option 1 text", "Option 2 text", "Option 3 text", "Option 4 text"]
+
+Question: ${question.question}`
       
       const response = await agent.generateResponse(prompt)
+      console.log('AI Response:', response)
       
       // Clean the response - remove markdown code blocks if present
       let cleanedResponse = response.trim()
@@ -224,6 +218,8 @@ Example format:
       } else if (cleanedResponse.startsWith('```')) {
         cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '')
       }
+      
+      console.log('Cleaned Response:', cleanedResponse)
       
       // Try to parse the response as JSON
       try {
@@ -234,6 +230,7 @@ Example format:
             text: String(suggestion).trim(),
             value: String(suggestion).trim()
           }))
+          console.log('Generated options:', options)
           setSuggestedOptions(options)
         } else {
           throw new Error('Response is not a valid array')
@@ -248,10 +245,12 @@ Example format:
             text: line.replace(/^[-*•"\[\]0-9.,\s]*/, '').replace(/["\]]*$/, '').trim(),
             value: line.replace(/^[-*•"\[\]0-9.,\s]*/, '').replace(/["\]]*$/, '').trim()
           })).filter(option => option.text.length > 0)
+          console.log('Fallback options:', options)
           setSuggestedOptions(options)
         } else {
           // Final fallback - provide generic suggestions based on question type
           const fallbackOptions = getFallbackSuggestions(question.question)
+          console.log('Using fallback suggestions:', fallbackOptions)
           setSuggestedOptions(fallbackOptions)
         }
       }
@@ -306,6 +305,11 @@ Example format:
     }
   }
 
+  const startReview = async () => {
+    if (!agent) return
+    await initializeReview(agent)
+  }
+
   const switchPhase = (phase: ReviewPhase) => {
     setCurrentPhase(phase)
     const questions = getPhaseQuestions(phase)
@@ -321,16 +325,8 @@ Example format:
     }
   }
 
-  const handleAnswerChange = (value: string | string[]) => {
+  const handleAnswerChange = (questionId: string, value: string | string[]) => {
     setCurrentAnswer(value)
-    
-    // Auto-submit if this is a button selection (not custom text input)
-    if (!showCustomInput && value) {
-      // Use setTimeout to ensure state is updated first
-      setTimeout(() => {
-        handleAnswerSubmit()
-      }, 100)
-    }
   }
 
   const handleAnswerSubmit = async () => {
@@ -349,7 +345,7 @@ Example format:
 
     setIsLoading(true)
     try {
-      // Process this single answer immediately into issues identification
+      // Process this single answer immediately into theory
       const response = {
         question: currentQuestion.question,
         answer: Array.isArray(currentAnswer) ? currentAnswer.join(', ') : currentAnswer,
@@ -386,34 +382,6 @@ Example format:
       if (nextQuestion && nextQuestion.type === 'text') {
         generateSuggestionsForTextQuestion(nextQuestion)
       }
-    } else {
-      // Current phase is complete, auto-advance to next phase
-      autoAdvancePhase()
-    }
-  }
-
-  const autoAdvancePhase = () => {
-    const phases: ReviewPhase[] = ['metadata', 'verification', 'customization']
-    const currentIndex = phases.indexOf(currentPhase)
-    
-    if (currentIndex < phases.length - 1) {
-      // Move to next phase
-      const nextPhase = phases[currentIndex + 1]
-      setCurrentPhase(nextPhase)
-      const questions = getPhaseQuestions(nextPhase)
-      setCurrentQuestions(questions)
-      setCurrentQuestionIndex(0)
-      setCurrentAnswer('')
-      setSuggestedOptions([])
-      setShowCustomInput(false)
-      
-      // Generate suggestions for the first question if it's a text question
-      if (questions[0] && questions[0].type === 'text') {
-        generateSuggestionsForTextQuestion(questions[0])
-      }
-    } else {
-      // All phases complete, switch to Correct tab
-      setCurrentTab('theory')
     }
   }
 
@@ -447,52 +415,19 @@ Example format:
     return currentQuestionIndex === 0
   }
 
-  const removeIssueStatement = async (statementId: string) => {
+  const removeTheoryStatement = async (statementId: string) => {
     if (!agent) return
 
     try {
-      // Get current state before modification
-      const currentState = agent.getState()
-      const currentStatements = currentState.theoryStatements || []
-      
-      // Check if statement exists
-      const statementExists = currentStatements.find(stmt => stmt.id === statementId)
-      if (!statementExists) {
-        console.warn('Statement not found:', statementId)
-        return
-      }
-      
-      // Remove the statement from service
       await agent.removeTheoryStatement(statementId)
-      
-      // Get updated state and verify the removal
       const updatedState = agent.getState()
-      const updatedStatements = updatedState.theoryStatements || []
-      
-      // Use functional updates to ensure proper state isolation
-      setTheoryStatements(() => {
-        // Create completely new array to avoid any reference issues
-        return updatedStatements.map(stmt => ({ ...stmt }))
-      })
-      
-      setConversation(() => ({ 
-        ...updatedState,
-        theoryStatements: updatedStatements.map(stmt => ({ ...stmt }))
-      }))
-      
+      setTheoryStatements(updatedState.theoryStatements || [])
     } catch (error) {
-      console.error('Error removing issue statement:', error)
-      // Refresh the issue statements from the service on error
-      try {
-        const fallbackState = agent.getState()
-        setTheoryStatements(fallbackState.theoryStatements?.map(stmt => ({ ...stmt })) || [])
-      } catch (fallbackError) {
-        console.error('Error refreshing issue statements:', fallbackError)
-      }
+      console.error('Error removing theory statement:', error)
     }
   }
 
-  const applyCorrectionsToEditor = async () => {
+  const applyTheoryToNotes = async () => {
     if (!agent || !onIterationProposed) return
     
     setIsIterating(true)
@@ -520,7 +455,7 @@ Example format:
               <button
                 key={option.id}
                 className={`option-btn ${currentAnswer === option.value ? 'selected' : ''}`}
-                onClick={() => handleAnswerChange(option.value)}
+                onClick={() => handleAnswerChange(question.id, option.value)}
               >
                 {option.text}
               </button>
@@ -538,9 +473,9 @@ Example format:
                 onClick={() => {
                   const currentAnswers = (currentAnswer as string[]) || []
                   if (currentAnswers.includes(option.value)) {
-                    handleAnswerChange(currentAnswers.filter(a => a !== option.value))
+                    handleAnswerChange(question.id, currentAnswers.filter(a => a !== option.value))
                   } else {
-                    handleAnswerChange([...currentAnswers, option.value])
+                    handleAnswerChange(question.id, [...currentAnswers, option.value])
                   }
                 }}
               >
@@ -568,7 +503,7 @@ Example format:
                     <button
                       key={option.id}
                       className={`option-btn ${currentAnswer === option.value ? 'selected' : ''}`}
-                      onClick={() => handleAnswerChange(option.value)}
+                      onClick={() => handleAnswerChange(question.id, option.value)}
                     >
                       {option.text}
                     </button>
@@ -583,6 +518,28 @@ Example format:
               </div>
             )}
 
+            {/* Debug information - remove later */}
+            {process.env.NODE_ENV === 'development' && (
+              <div style={{ 
+                background: '#f0f0f0', 
+                padding: '10px', 
+                margin: '10px 0', 
+                fontSize: '12px',
+                borderRadius: '4px',
+                border: '1px solid #ccc'
+              }}>
+                <strong>Debug:</strong><br/>
+                Generating: {isGeneratingSuggestions ? 'true' : 'false'}<br/>
+                Suggestions count: {suggestedOptions.length}<br/>
+                Show custom: {showCustomInput ? 'true' : 'false'}<br/>
+                {suggestedOptions.length > 0 && (
+                  <>
+                    Suggestions: {JSON.stringify(suggestedOptions.map(s => s.text), null, 2)}
+                  </>
+                )}
+              </div>
+            )}
+            
             {(showCustomInput || suggestedOptions.length === 0) && !isGeneratingSuggestions && (
               <div className="custom-input-section">
                 {suggestedOptions.length > 0 && (
@@ -598,7 +555,7 @@ Example format:
                 )}
                 <textarea
                   value={currentAnswer as string || ''}
-                  onChange={(e) => handleAnswerChange(e.target.value)}
+                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
                   className="question-textarea"
                   placeholder="Enter your response..."
                   rows={4}
@@ -640,7 +597,7 @@ Example format:
             className={`main-tab-btn ${currentTab === 'theory' ? 'active' : ''}`}
             onClick={() => setCurrentTab('theory')}
           >
-            ✅ Correct ({theoryStatements.length})
+            🧠 Theory ({theoryStatements.length})
           </button>
         </div>
       </div>
@@ -723,16 +680,13 @@ Example format:
                     ⏭️ Skip
                   </button>
                   
-                  {/* Only show Answer & Next button for custom text input or non-text questions */}
-                  {(showCustomInput || getCurrentQuestion()?.type !== 'text') && (
-                    <button 
-                      className="action-btn answer-btn"
-                      onClick={handleAnswerSubmit}
-                      disabled={isLoading || (!currentAnswer && getCurrentQuestion()!.required)}
-                    >
-                      {isLoading ? 'Processing...' : (isLastQuestion() ? '✅ Finish' : '➡️ Answer & Next')}
-                    </button>
-                  )}
+                  <button 
+                    className="action-btn answer-btn"
+                    onClick={handleAnswerSubmit}
+                    disabled={isLoading || (!currentAnswer && getCurrentQuestion()!.required)}
+                  >
+                    {isLoading ? 'Processing...' : (isLastQuestion() ? '✅ Finish' : '➡️ Answer & Next')}
+                  </button>
                 </div>
               </div>
             )}
@@ -741,7 +695,7 @@ Example format:
               <div className="phase-complete">
                 <div className="completion-message">
                   <h5>🎉 {currentPhase.charAt(0).toUpperCase() + currentPhase.slice(1)} Phase Complete!</h5>
-                  <p>You can switch to another phase or check the Correct tab to see the issues I've identified.</p>
+                  <p>You can switch to another phase or check the Theory tab to see what I've learned.</p>
                 </div>
               </div>
             )}
@@ -752,17 +706,17 @@ Example format:
       {currentTab === 'theory' && (
         <div className="theory-content">
           <div className="theory-header">
-            <h4>✅ Corrections Needed</h4>
+            <h4>🧠 My Understanding (Theory)</h4>
             <p>
-              Based on our interaction, here are the issues I've identified that need to be corrected. 
-              You can remove any issues that are incorrect.
+              Based on our interaction, here's what I understand about your preferences. 
+              You can remove any statements that are incorrect.
             </p>
           </div>
 
           <div className="theory-list">
             {theoryStatements.length === 0 ? (
               <div className="no-theory">
-                <p>No issues identified yet. Please answer some questions in the Review tab to help me identify areas for improvement.</p>
+                <p>No theory statements yet. Please answer some questions in the Review tab to build my understanding.</p>
               </div>
             ) : (
               theoryStatements.map((statement) => (
@@ -776,7 +730,7 @@ Example format:
                   </div>
                   <button 
                     className="remove-statement-btn"
-                    onClick={() => removeIssueStatement(statement.id)}
+                    onClick={() => removeTheoryStatement(statement.id)}
                     title="Remove this statement"
                   >
                     ❌
@@ -790,16 +744,16 @@ Example format:
             <div className="theory-actions">
               <button 
                 className="apply-theory-btn"
-                onClick={applyCorrectionsToEditor}
+                onClick={applyTheoryToNotes}
                 disabled={isIterating}
               >
                 {isIterating ? (
                   <>
                     <div className="loading-spinner"></div>
-                    Correcting in Editor...
+                    Applying Theory...
                   </>
                 ) : (
-                  '✏️ Correct in Editor'
+                  '🚀 Apply Theory to Notes'
                 )}
               </button>
             </div>
@@ -809,7 +763,7 @@ Example format:
             <div className="iteration-loading">
               <div className="loading-message">
                 <div className="loading-spinner-large"></div>
-                <p>Applying corrections to your notes in the editor...</p>
+                <p>Applying my understanding to enhance your notes...</p>
               </div>
             </div>
           )}
