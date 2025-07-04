@@ -4,7 +4,7 @@ import type { RenderTask } from 'pdfjs-dist/types/src/display/api'
 import './PDFViewer.css'
 
 // Use local worker file - no external dependencies
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
+pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.min.js'
 
 interface PDFViewerProps {
   file: File

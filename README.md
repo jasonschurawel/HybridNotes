@@ -291,43 +291,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🚀 **Deployment**
-
-### **GitHub Pages (Automatic)**
-
-HybridNotes is configured for automatic deployment to GitHub Pages:
-
-1. **Fork or Clone** this repository to your GitHub account
-2. **Enable GitHub Pages** in repository Settings → Pages → Source: GitHub Actions
-3. **Push to main branch** - automatic deployment will trigger
-4. **Access your app** at `https://yourusername.github.io/repository-name/`
-
-The GitHub Actions workflow automatically:
-- ✅ Builds the application
-- ✅ Runs tests and linting
-- ✅ Deploys to GitHub Pages
-- ✅ Uses latest action versions (no deprecated dependencies)
-
-### **Local Build**
-
-For manual deployment to other platforms:
-
-```bash
-npm run build
-# Built files will be in dist/ directory
-```
-
-### **Custom Domain**
-
-To use a custom domain with GitHub Pages:
-1. Add a `CNAME` file to the `public/` directory
-2. Configure DNS settings
-3. Update base path in `vite.config.ts`
-
-📖 **Detailed deployment instructions**: See [DEPLOYMENT.md](DEPLOYMENT.md)
-
----
-
 ## 🎉 **Acknowledgments**
 
 - **Google** for the powerful Gemini API
