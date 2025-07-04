@@ -3,8 +3,8 @@ import * as pdfjsLib from 'pdfjs-dist'
 import type { RenderTask } from 'pdfjs-dist/types/src/display/api'
 import './PDFViewer.css'
 
-// Disable PDF.js worker completely - run everything in main thread
-pdfjsLib.GlobalWorkerOptions.workerSrc = ''
+// Completely disable PDF.js worker - use empty data URL to prevent external loading
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'data:application/javascript;base64,'
 
 interface PDFViewerProps {
   file: File
