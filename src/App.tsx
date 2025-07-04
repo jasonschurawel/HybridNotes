@@ -149,7 +149,7 @@ function App() {
         processing: false,
         error: error instanceof Error
           ? error.message
-          : 'Failed to enhance PDF. Please check your API key and try again.'
+          : 'Failed to process PDF. Please check your API key and try again.'
       })
       console.error('Gemini API error:', error)
     } finally {
@@ -172,7 +172,7 @@ function App() {
           <div className="processing-card">
             <div className="processing-icon">⚡</div>
             <h2>Enhancing your notes...</h2>
-            <p>Our AI is analyzing your PDF and improving the content</p>
+            <p>Processing your document and restructuring the content for better readability</p>
             <div className="processing-spinner">
               <div className="spinner-ring"></div>
             </div>
@@ -215,7 +215,7 @@ function App() {
               <h2>PDF Ready for Enhancement</h2>
               <p className="file-name">{fileName}</p>
               <p className="file-description">
-                Your PDF has been uploaded successfully. Click the button below to enhance your notes with AI.
+                Your PDF has been uploaded successfully. Click the button below to extract, clean, and structure your notes for better readability.
               </p>
             </div>
             
@@ -224,8 +224,8 @@ function App() {
               onClick={handleImproveText}
               disabled={!apiKey}
             >
-              <span className="button-icon">🤖</span>
-              Enhance Notes with AI
+              <span className="button-icon">✨</span>
+              Enhance & Structure Notes
             </button>
             
             <div className="card-footer">
@@ -248,10 +248,11 @@ function App() {
           <h1>Welcome to HybridNotes</h1>
           <p className="welcome-subtitle">Paper is not obsolete.</p>
           <p className="welcome-description">
-            Transform your handwritten notes and documents with AI-powered enhancement. 
-            Follow the guided setup process to get started.
+            Transform messy handwritten notes, scanned documents, and PDFs into clean, structured, and well-organized text. Perfect for students, researchers, professionals, and anyone who takes handwritten notes but wants digital versions that are easy to read, search, and share.
             <br /><br />
-            <strong>💡 Tip:</strong> Use modern browsers (Chrome, Edge) for the best file saving experience - you can save enhanced notes directly to the same folder as your PDF!
+            <strong>What it does:</strong> Extracts text from your PDFs, cleans up formatting, fixes spelling and grammar, organizes content with proper headings and structure, and outputs professional markdown or text files.
+            <br /><br />
+            <strong>💡 Tip:</strong> For best results, use high-quality scans or clear photos of your handwritten notes. The clearer your source material, the better the text extraction and enhancement will be!
           </p>
           
           <div className="quick-actions">
@@ -329,7 +330,7 @@ function App() {
       >
         <div className="dialog-step">
           <p className="step-description">
-            Enter your Google Gemini API key to enable AI-powered note enhancement.
+            Enter your Google Gemini API key to enable automated note enhancement and text structuring.
           </p>
           <APIKeyInput 
             apiKey={apiKey} 
@@ -411,7 +412,7 @@ function App() {
       >
         <div className="dialog-step">
           <p className="step-description">
-            Upload your PDF document to extract and enhance the content.
+            Upload your PDF document to extract and structure the content.
           </p>
           <FileUpload 
             onFileUpload={handleFileUpload}

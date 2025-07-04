@@ -3,8 +3,8 @@ import * as pdfjsLib from 'pdfjs-dist'
 import type { RenderTask } from 'pdfjs-dist/types/src/display/api'
 import './PDFViewer.css'
 
-// Use local worker file - no external dependencies
-pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.min.js'
+// Use local worker file from public folder
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
 interface PDFViewerProps {
   file: File

@@ -121,7 +121,7 @@ const PDFComparison: React.FC<PDFComparisonProps> = ({
             <div className="comparison-panel improved-panel">
               <div className="panel-header">
                 <h4>✨ Enhanced Notes</h4>
-                <span className="panel-subtitle">AI-improved version</span>
+                <span className="panel-subtitle">Cleaned & structured version</span>
               </div>
               <div className="panel-content">
                 <TextPreview 

@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import type { TextItem, TextMarkedContent } from 'pdfjs-dist/types/src/display/api'
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+// Configure PDF.js worker to use local file from public folder
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 
 export const extractTextFromPDF = async (file: File): Promise<string> => {
   try {
