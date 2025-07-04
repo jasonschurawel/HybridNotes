@@ -1,0 +1,224 @@
+/* filepath: /home/thinclient/Documents/notizen-tool/src/components/PDFTranscriber.css */
+.pdf-transcriber {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.transcriber-section {
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 24px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  color: var(--md-sys-color-on-surface);
+  flex-shrink: 0;
+}
+
+.save-button {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 10px 24px;
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.save-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+}
+
+.save-button:hover::before {
+  opacity: 0.08;
+}
+
+.save-button:focus-visible::before {
+  opacity: 0.12;
+}
+
+.save-button:active::before {
+  opacity: 0.16;
+}
+
+.improve-section {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.improve-button {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 16px 32px;
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+  min-height: 56px;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.improve-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+}
+
+.improve-button:hover:not(:disabled)::before {
+  opacity: 0.08;
+}
+
+.improve-button:focus-visible::before {
+  opacity: 0.12;
+}
+
+.improve-button:active:not(:disabled)::before {
+  opacity: 0.16;
+}
+
+.improve-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background-color: var(--md-sys-color-on-surface);
+  color: var(--md-sys-color-surface);
+}
+
+.improve-button .spinner {
+  animation: pulse var(--md-sys-motion-duration-extra-long2) var(--md-sys-motion-easing-linear) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.error-message {
+  background-color: var(--md-sys-color-error-container);
+  border: 1px solid var(--md-sys-color-error);
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: 16px;
+  margin: 16px 0;
+  color: var(--md-sys-color-on-error-container);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--md-sys-typescale-body-medium-font);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+}
+
+.file-info {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: var(--md-sys-color-primary-container);
+  border-radius: var(--md-sys-shape-corner-medium);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.file-info h3 {
+  color: var(--md-sys-color-on-primary-container);
+  margin: 0 0 8px 0;
+  font-family: var(--md-sys-typescale-title-medium-font);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  line-height: var(--md-sys-typescale-title-medium-line-height);
+}
+
+.file-info p {
+  color: var(--md-sys-color-on-primary-container);
+  margin: 0;
+  font-family: var(--md-sys-typescale-body-medium-font);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+  opacity: 0.87;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pdf-transcriber {
+    gap: 16px;
+  }
+  
+  .transcriber-section {
+    padding: 16px;
+    border-radius: var(--md-sys-shape-corner-medium);
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .section-header h3 {
+    font-size: var(--md-sys-typescale-title-medium-size);
+  }
+  
+  .improve-button {
+    padding: 12px 24px;
+    font-size: var(--md-sys-typescale-label-large-size);
+    min-width: auto;
+    min-height: 48px;
+  }
+  
+  .save-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

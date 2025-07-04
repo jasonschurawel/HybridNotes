@@ -1,0 +1,94 @@
+.additional-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background-color: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.notes-label {
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  color: var(--md-sys-color-on-surface);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.notes-textarea {
+  padding: 16px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+  font-family: var(--md-sys-typescale-body-large-font);
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  resize: vertical;
+  min-height: 100px;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+}
+
+.notes-textarea::placeholder {
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 0.87;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: var(--md-sys-color-primary);
+  border-width: 2px;
+  background-color: var(--md-sys-color-surface-container);
+}
+
+.notes-textarea:hover:not(:disabled) {
+  border-color: var(--md-sys-color-on-surface-variant);
+  background-color: var(--md-sys-color-surface-container);
+}
+
+.notes-textarea:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background-color: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface-variant);
+  resize: none;
+}
+
+.notes-description {
+  font-family: var(--md-sys-typescale-body-small-font);
+  font-size: var(--md-sys-typescale-body-small-size);
+  font-weight: var(--md-sys-typescale-body-small-weight);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0;
+  opacity: 0.87;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .additional-notes {
+    padding: 16px;
+    gap: 8px;
+  }
+  
+  .notes-label {
+    font-size: var(--md-sys-typescale-body-large-size);
+  }
+  
+  .notes-textarea {
+    padding: 12px;
+    font-size: var(--md-sys-typescale-body-medium-size);
+    min-height: 80px;
+  }
+  
+  .notes-description {
+    font-size: var(--md-sys-typescale-label-small-size);
+  }
+}
