@@ -1,0 +1,280 @@
+.pdf-split-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.split-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.split-view-header h3 {
+  margin: 0;
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  color: var(--md-sys-color-on-surface);
+}
+
+.split-view-content {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 600px;
+}
+
+.pdf-panel,
+.text-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-large);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  overflow: hidden;
+  min-width: 0; /* Allow panels to shrink */
+}
+
+.text-panel {
+  border: 2px solid var(--md-sys-color-primary);
+  background-color: var(--md-sys-color-primary-container);
+}
+
+.panel-header {
+  padding: 16px 20px 12px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.text-panel .panel-header {
+  background-color: var(--md-sys-color-primary-container);
+}
+
+.panel-header h4 {
+  margin: 0;
+  font-family: var(--md-sys-typescale-title-medium-font);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  line-height: var(--md-sys-typescale-title-medium-line-height);
+  color: var(--md-sys-color-on-surface);
+}
+
+.text-panel .panel-header h4 {
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.panel-subtitle {
+  font-family: var(--md-sys-typescale-body-small-font);
+  font-size: var(--md-sys-typescale-body-small-size);
+  font-weight: var(--md-sys-typescale-body-small-weight);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.text-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.text-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  font-family: var(--md-sys-typescale-body-small-font);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-primary-container);
+  background-color: var(--md-sys-color-surface-container);
+  padding: 4px 8px;
+  border-radius: var(--md-sys-shape-corner-small);
+  white-space: nowrap;
+}
+
+.copy-button {
+  background-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: 6px 12px;
+  font-family: var(--md-sys-typescale-label-small-font);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  position: relative;
+  overflow: hidden;
+  min-height: 32px;
+}
+
+.copy-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+}
+
+.copy-button:hover:not(:disabled)::before {
+  opacity: 0.08;
+}
+
+.copy-button:focus-visible::before {
+  opacity: 0.12;
+}
+
+.copy-button:active:not(:disabled)::before {
+  opacity: 0.16;
+}
+
+.copy-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.panel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.split-pdf-viewer {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+}
+
+.enhanced-text-editor {
+  flex: 1;
+  width: 100%;
+  min-height: 400px;
+  padding: 20px;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  color: var(--md-sys-color-on-primary-container);
+  font-family: var(--md-sys-typescale-body-large-font);
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  line-height: 1.6;
+  resize: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.enhanced-text-editor::placeholder {
+  color: var(--md-sys-color-on-primary-container);
+  opacity: 0.6;
+}
+
+.enhanced-text-editor:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--md-sys-color-primary);
+}
+
+.enhanced-text-editor:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Scrollbar styling for the text editor */
+.enhanced-text-editor::-webkit-scrollbar {
+  width: 8px;
+}
+
+.enhanced-text-editor::-webkit-scrollbar-track {
+  background: var(--md-sys-color-surface-container);
+  border-radius: 4px;
+}
+
+.enhanced-text-editor::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline);
+  border-radius: 4px;
+}
+
+.enhanced-text-editor::-webkit-scrollbar-thumb:hover {
+  background: var(--md-sys-color-outline-variant);
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .split-view-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .pdf-panel,
+  .text-panel {
+    min-height: 400px;
+  }
+  
+  .enhanced-text-editor {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .split-view-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .split-view-header h3 {
+    font-size: var(--md-sys-typescale-title-medium-size);
+  }
+  
+  .panel-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 16px 8px;
+  }
+  
+  .text-controls {
+    justify-content: space-between;
+  }
+  
+  .text-stats {
+    gap: 8px;
+  }
+  
+  .stat {
+    font-size: var(--md-sys-typescale-label-small-size);
+    padding: 2px 6px;
+  }
+  
+  .enhanced-text-editor {
+    padding: 16px;
+    font-size: var(--md-sys-typescale-body-medium-size);
+  }
+  
+  .split-view-content {
+    min-height: 500px;
+  }
+  
+  .pdf-panel,
+  .text-panel {
+    min-height: 350px;
+  }
+}

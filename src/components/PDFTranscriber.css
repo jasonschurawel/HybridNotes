@@ -81,6 +81,68 @@
   padding: 16px 0;
 }
 
+.view-mode-controls {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0 0;
+}
+
+.view-mode-button {
+  background-color: var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-on-tertiary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 12px 24px;
+  font-family: var(--md-sys-typescale-label-medium-font);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  line-height: var(--md-sys-typescale-label-medium-line-height);
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  position: relative;
+  overflow: hidden;
+}
+
+.view-mode-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+}
+
+.view-mode-button:hover:not(:disabled)::before {
+  opacity: 0.08;
+}
+
+.view-mode-button:focus-visible::before {
+  opacity: 0.12;
+}
+
+.view-mode-button:active:not(:disabled)::before {
+  opacity: 0.16;
+}
+
+.view-mode-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background-color: var(--md-sys-color-on-surface);
+  color: var(--md-sys-color-surface);
+}
+
+.comparison-section {
+  min-height: 600px;
+  padding: 16px;
+}
+
 .improve-button {
   background-color: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
@@ -187,6 +249,11 @@
   opacity: 0.87;
 }
 
+.split-view-section {
+  min-height: 600px;
+  padding: 16px;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .pdf-transcriber {
@@ -219,5 +286,21 @@
   .save-button {
     width: 100%;
     justify-content: center;
+  }
+  
+  .split-view-section {
+    min-height: 500px;
+    padding: 12px;
+  }
+  
+  .view-mode-button {
+    padding: 10px 20px;
+    font-size: var(--md-sys-typescale-label-medium-size);
+    min-height: 40px;
+  }
+  
+  .comparison-section {
+    min-height: 500px;
+    padding: 12px;
   }
 }

@@ -5,6 +5,7 @@ import APIKeyInput from './APIKeyInput.tsx'
 import LanguageSelector from './LanguageSelector.tsx'
 import AdditionalNotes from './AdditionalNotes.tsx'
 import SaveOptions from './SaveOptions.tsx'
+import PDFSplitView from './PDFSplitView.tsx'
 import type { Language } from './LanguageSelector.tsx'
 import { improvePDFWithGemini } from '../services/geminiService.ts'
 import './PDFTranscriber.css'
@@ -31,6 +32,10 @@ const PDFTranscriber: React.FC = () => {
     setUploadedFile(file)
     setImprovedText('') // Clear previous improved text
     setProcessing({ processing: false, error: null })
+  }
+
+  const handleTextChange = (newText: string) => {
+    setImprovedText(newText)
   }
 
   const handleImproveText = async () => {
@@ -113,6 +118,7 @@ const PDFTranscriber: React.FC = () => {
             <h3>📄 Uploaded: {fileName}</h3>
             <p>Ready to enhance your notes</p>
           </div>
+          
           <div className="improve-section">
             <button 
               className="improve-button"
@@ -134,7 +140,19 @@ const PDFTranscriber: React.FC = () => {
         </div>
       )}
 
-      {improvedText && (
+      {improvedText && uploadedFile && (
+        <div className="transcriber-section split-view-section">
+          <PDFSplitView 
+            file={uploadedFile}
+            enhancedText={improvedText}
+            fileName={fileName}
+            onTextChange={handleTextChange}
+            disabled={processing.processing}
+          />
+        </div>
+      )}
+
+      {improvedText && !uploadedFile && (
         <div className="transcriber-section">
           <div className="section-header">
             <h3>✨ Improved Notes</h3>

@@ -1,0 +1,221 @@
+.pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--md-sys-color-surface);
+  border-radius: var(--md-sys-shape-corner-medium);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  overflow: hidden;
+}
+
+.pdf-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.navigation-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-button {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  min-height: 36px;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+}
+
+.nav-button:hover:not(:disabled)::before {
+  opacity: 0.08;
+}
+
+.nav-button:focus-visible::before {
+  opacity: 0.12;
+}
+
+.nav-button:active:not(:disabled)::before {
+  opacity: 0.16;
+}
+
+.nav-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background-color: var(--md-sys-color-on-surface);
+  color: var(--md-sys-color-surface);
+}
+
+.page-info {
+  font-family: var(--md-sys-typescale-body-medium-font);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  color: var(--md-sys-color-on-surface);
+  min-width: 60px;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-button {
+  background-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  min-height: 32px;
+  min-width: 40px;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.zoom-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+}
+
+.zoom-button:hover::before {
+  opacity: 0.08;
+}
+
+.zoom-button:focus-visible::before {
+  opacity: 0.12;
+}
+
+.zoom-button:active::before {
+  opacity: 0.16;
+}
+
+.pdf-content {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: var(--md-sys-color-surface-variant);
+}
+
+.pdf-canvas {
+  max-width: 100%;
+  height: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: var(--md-sys-shape-corner-small);
+  background-color: white;
+}
+
+.pdf-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: 16px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.loading-spinner {
+  font-size: 48px;
+  animation: pulse var(--md-sys-motion-duration-extra-long2) var(--md-sys-motion-easing-linear) infinite;
+}
+
+.pdf-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: 16px;
+  color: var(--md-sys-color-error);
+  text-align: center;
+  padding: 24px;
+}
+
+.pdf-error .error-icon {
+  font-size: 48px;
+}
+
+.pdf-error p {
+  margin: 0;
+  font-family: var(--md-sys-typescale-body-medium-font);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-error-container);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pdf-controls {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .navigation-controls {
+    gap: 8px;
+  }
+  
+  .nav-button {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-height: 32px;
+  }
+  
+  .zoom-controls {
+    gap: 6px;
+  }
+  
+  .zoom-button {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-height: 28px;
+    min-width: 36px;
+  }
+  
+  .pdf-content {
+    padding: 12px;
+  }
+}

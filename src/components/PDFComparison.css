@@ -1,0 +1,286 @@
+.pdf-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.comparison-header h3 {
+  margin: 0;
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  color: var(--md-sys-color-on-surface);
+}
+
+.view-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.view-toggle-button {
+  background-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
+  border: none;
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 8px 16px;
+  font-family: var(--md-sys-typescale-label-medium-font);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  cursor: pointer;
+  transition: all var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-standard);
+  position: relative;
+  overflow: hidden;
+  min-height: 40px;
+}
+
+.view-toggle-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short1) var(--md-sys-motion-easing-standard);
+}
+
+.view-toggle-button:hover::before {
+  opacity: 0.08;
+}
+
+.view-toggle-button:focus-visible::before {
+  opacity: 0.12;
+}
+
+.view-toggle-button:active::before {
+  opacity: 0.16;
+}
+
+.comparison-content {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 600px;
+}
+
+.comparison-content.side-by-side {
+  flex-direction: row;
+}
+
+.comparison-content.stacked {
+  flex-direction: column;
+}
+
+.comparison-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-large);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  overflow: hidden;
+  transition: all var(--md-sys-motion-duration-medium2) var(--md-sys-motion-easing-standard);
+}
+
+.comparison-content.side-by-side .comparison-panel {
+  flex: 1;
+  min-width: 0; /* Allow panels to shrink */
+}
+
+.comparison-content.stacked .comparison-panel {
+  min-height: 400px;
+}
+
+.panel-header {
+  padding: 16px 20px 12px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.panel-header h4 {
+  margin: 0 0 4px 0;
+  font-family: var(--md-sys-typescale-title-medium-font);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  line-height: var(--md-sys-typescale-title-medium-line-height);
+  color: var(--md-sys-color-on-surface);
+}
+
+.panel-subtitle {
+  font-family: var(--md-sys-typescale-body-small-font);
+  font-size: var(--md-sys-typescale-body-small-size);
+  font-weight: var(--md-sys-typescale-body-small-weight);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.panel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.comparison-pdf-viewer {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+}
+
+.comparison-text-preview {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.comparison-text-preview.improved {
+  background-color: var(--md-sys-color-primary-container);
+}
+
+.comparison-divider {
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--md-sys-color-outline-variant),
+    var(--md-sys-color-primary),
+    var(--md-sys-color-outline-variant)
+  );
+  border-radius: 1px;
+  margin: 20px 0;
+  flex-shrink: 0;
+}
+
+.comparison-content.stacked .comparison-divider {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--md-sys-color-outline-variant),
+    var(--md-sys-color-primary),
+    var(--md-sys-color-outline-variant)
+  );
+  margin: 8px 0;
+}
+
+.improved-panel {
+  border: 2px solid var(--md-sys-color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.improved-panel .panel-header {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.improved-panel .panel-header h4 {
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.improved-panel .panel-subtitle {
+  color: var(--md-sys-color-on-primary-container);
+  opacity: 0.87;
+}
+
+.comparison-loading,
+.comparison-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: 16px;
+  text-align: center;
+  padding: 24px;
+}
+
+.comparison-loading {
+  color: var(--md-sys-color-on-surface);
+}
+
+.comparison-error {
+  color: var(--md-sys-color-error);
+}
+
+.comparison-loading .loading-spinner {
+  font-size: 48px;
+  animation: pulse var(--md-sys-motion-duration-extra-long2) var(--md-sys-motion-easing-linear) infinite;
+}
+
+.comparison-error .error-icon {
+  font-size: 48px;
+}
+
+.comparison-loading p,
+.comparison-error p {
+  margin: 0;
+  font-family: var(--md-sys-typescale-body-medium-font);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .comparison-content.side-by-side {
+    flex-direction: column;
+  }
+  
+  .comparison-content.side-by-side .comparison-panel {
+    min-height: 400px;
+  }
+  
+  .comparison-content.side-by-side .comparison-divider {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      var(--md-sys-color-outline-variant),
+      var(--md-sys-color-primary),
+      var(--md-sys-color-outline-variant)
+    );
+    margin: 8px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .comparison-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .comparison-header h3 {
+    font-size: var(--md-sys-typescale-title-medium-size);
+  }
+  
+  .view-controls {
+    justify-content: center;
+  }
+  
+  .panel-header {
+    padding: 12px 16px 8px;
+  }
+  
+  .panel-header h4 {
+    font-size: var(--md-sys-typescale-title-small-size);
+  }
+  
+  .comparison-content {
+    gap: 12px;
+    min-height: 500px;
+  }
+  
+  .comparison-content.stacked .comparison-panel {
+    min-height: 300px;
+  }
+}
