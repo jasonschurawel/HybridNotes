@@ -3,6 +3,10 @@
   flex-direction: column;
   gap: 16px;
   height: 100%;
+  width: 100%;
+  max-width: 2000px; /* Increased from 1600px for wider screens */
+  margin: 0 auto; /* Center on very wide screens */
+  padding: 16px; /* Reduced from 24px for more space */
 }
 
 .split-view-header {

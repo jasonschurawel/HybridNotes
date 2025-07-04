@@ -37,6 +37,22 @@
   }
 }
 
+.split-button .md-button-filled {
+  background-color: #4CAF50 !important; /* Green background for save button */
+  color: white !important;
+  border: none !important; /* Remove any borders */
+}
+
+.split-button .md-button-filled:hover {
+  background-color: #45a049 !important; /* Darker green on hover */
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3) !important;
+}
+
+.split-button .md-button-filled:focus {
+  background-color: #4CAF50 !important;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.4) !important;
+}
+
 /* Split Button Container */
 .split-button {
   display: flex;

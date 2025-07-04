@@ -2,6 +2,7 @@ import { useState } from 'react'
 import NavigationRail from './components/NavigationRail.tsx'
 import type { NavigationStep } from './components/NavigationRail.tsx'
 import MaterialDialog from './components/MaterialDialog.tsx'
+import SuccessDialog from './components/SuccessDialog.tsx'
 import APIKeyInput from './components/APIKeyInput.tsx'
 import LanguageSelector from './components/LanguageSelector.tsx'
 import type { Language } from './components/LanguageSelector.tsx'
@@ -30,6 +31,8 @@ function App() {
   const [fileName, setFileName] = useState<string>('')
   const [improvedText, setImprovedText] = useState<string>('')
   const [hasUserSaved, setHasUserSaved] = useState<boolean>(false) // Track if user has saved
+  const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false) // Success dialog state
+  const [savedFileName, setSavedFileName] = useState<string>('') // Track saved filename
   
   // Processing state
   const [processing, setProcessing] = useState<ProcessingState>({
@@ -92,8 +95,27 @@ function App() {
     }
   }
 
-  const handleFileSaved = () => {
+  const handleFileSaved = (savedFile: string) => {
     setHasUserSaved(true)
+    setSavedFileName(savedFile)
+    setShowSuccessDialog(true)
+  }
+
+  const handleSuccessDialogClose = () => {
+    setShowSuccessDialog(false)
+  }
+
+  const handleTranscribeNext = () => {
+    // Reset the app state for next transcription
+    setUploadedFile(null)
+    setFileName('')
+    setImprovedText('')
+    setHasUserSaved(false)
+    setShowSuccessDialog(false)
+    setSavedFileName('')
+    setProcessing({ processing: false, error: null })
+    setCurrentStep('upload')
+    setOpenDialog('upload')
   }
 
   const handleLanguageChange = (language: Language) => {
@@ -437,6 +459,14 @@ function App() {
           </div>
         </div>
       </MaterialDialog>
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={handleSuccessDialogClose}
+        fileName={savedFileName}
+        onTranscribeNext={handleTranscribeNext}
+      />
     </div>
   )
 }

@@ -9,7 +9,7 @@ interface PDFSplitViewProps {
   fileName: string
   onTextChange: (text: string) => void
   disabled?: boolean
-  onFileSaved?: () => void // Add callback for when file is saved
+  onFileSaved?: (savedFileName: string) => void // Add callback for when file is saved with filename
 }
 
 const PDFSplitView: React.FC<PDFSplitViewProps> = ({ 

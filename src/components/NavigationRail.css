@@ -122,6 +122,8 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   border: 2px solid transparent;
+  position: relative;
+  z-index: 2; /* Above connectors */
 }
 
 .step-button:not(.completed):not(.current) .step-icon {
@@ -172,18 +174,22 @@
 
 .step-connector {
   position: absolute;
-  left: 36px;
-  top: 48px;
+  left: 36px; /* Center of the 32px icon (16px radius from left edge) */
+  top: 48px; /* Bottom edge of current icon (32px center + 16px radius) */
   width: 3px;
-  height: 40px; /* Full connection between step icons */
+  height: 36px; /* Span to top of next icon */
   background: var(--md-sys-color-outline-variant);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 1.5px;
+  z-index: 1; /* Behind step icons */
 }
 
 .step-connector.completed {
   background: #4CAF50; /* Green connector for completed steps */
   box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+  height: 68px; /* Full height to completely connect through to next step */
+  top: 32px; /* Start from center of current icon to center of next icon */
+  z-index: 1; /* Behind step icons but visible */
 }
 
 .rail-footer {
