@@ -131,7 +131,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, className = '' }) => {
         renderTaskRef.current = null
       }
     }
-  }, [pdf, currentPage, scale])
+  }, [pdf, currentPage, scale, totalPages])
 
   const goToPreviousPage = () => {
     if (currentPage > 1) {
