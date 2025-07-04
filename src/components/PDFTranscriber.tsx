@@ -58,7 +58,7 @@ const PDFTranscriber: React.FC = () => {
     setProcessing({ processing: true, error: null })
     
     try {
-      const improved = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage, additionalNotes)
+      const improved = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage)
       setImprovedText(improved)
     } catch (error: unknown) {
       setProcessing({ 

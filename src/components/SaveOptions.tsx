@@ -2,6 +2,29 @@ import React, { useState, useRef, useEffect } from 'react'
 import { saveAs } from 'file-saver'
 import './SaveOptions.css'
 
+// Type declarations for File System Access API
+declare global {
+  interface Window {
+    showSaveFilePicker?: (options?: {
+      suggestedName?: string;
+      types?: Array<{
+        description: string;
+        accept: Record<string, string[]>;
+      }>;
+      startIn?: string;
+    }) => Promise<FileSystemFileHandle>;
+  }
+}
+
+interface FileSystemFileHandle {
+  createWritable(): Promise<FileSystemWritableFileStream>;
+}
+
+interface FileSystemWritableFileStream {
+  write(data: string): Promise<void>;
+  close(): Promise<void>;
+}
+
 interface SaveOptionsProps {
   text: string
   originalFileName: string
@@ -42,7 +65,7 @@ const SaveOptions: React.FC<SaveOptionsProps> = ({
     try {
       // Check if File System Access API is supported
       if ('showSaveFilePicker' in window) {
-        const fileHandle = await (window as any).showSaveFilePicker({
+        const fileHandle = await window.showSaveFilePicker!({
           suggestedName: filename,
           types: [{
             description: 'Text files',
