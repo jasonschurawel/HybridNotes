@@ -10,6 +10,9 @@ interface PDFSplitViewProps {
   onTextChange: (text: string) => void
   disabled?: boolean
   onFileSaved?: (savedFileName: string) => void // Add callback for when file is saved with filename
+  proposedIteration?: { newText: string; changes: string[] } | null
+  onIterationAccepted?: () => void
+  onIterationRejected?: () => void
 }
 
 const PDFSplitView: React.FC<PDFSplitViewProps> = ({ 
@@ -18,9 +21,13 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
   fileName,
   onTextChange,
   disabled = false,
-  onFileSaved
+  onFileSaved,
+  proposedIteration,
+  onIterationAccepted,
+  onIterationRejected
 }) => {
   const [editableText, setEditableText] = useState(enhancedText)
+  const [showDiff, setShowDiff] = useState(false)
 
   const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = event.target.value
@@ -44,6 +51,50 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
 
   const getCharCount = () => {
     return editableText.length
+  }
+
+  // Simple diff function to highlight changes
+  const createSimpleDiff = (originalText: string, newText: string) => {
+    const originalLines = originalText.split('\n')
+    const newLines = newText.split('\n')
+    const maxLines = Math.max(originalLines.length, newLines.length)
+    
+    const diff = []
+    for (let i = 0; i < maxLines; i++) {
+      const originalLine = originalLines[i] || ''
+      const newLine = newLines[i] || ''
+      
+      if (originalLine !== newLine) {
+        if (originalLine && newLine) {
+          diff.push({ type: 'changed', original: originalLine, new: newLine, lineNum: i + 1 })
+        } else if (originalLine) {
+          diff.push({ type: 'removed', original: originalLine, new: '', lineNum: i + 1 })
+        } else {
+          diff.push({ type: 'added', original: '', new: newLine, lineNum: i + 1 })
+        }
+      }
+    }
+    return diff
+  }
+
+  const handleAcceptIteration = () => {
+    if (proposedIteration && onIterationAccepted) {
+      setEditableText(proposedIteration.newText)
+      onTextChange(proposedIteration.newText)
+      onIterationAccepted()
+      setShowDiff(false)
+    }
+  }
+
+  const handleRejectIteration = () => {
+    if (onIterationRejected) {
+      onIterationRejected()
+      setShowDiff(false)
+    }
+  }
+
+  const toggleDiffView = () => {
+    setShowDiff(!showDiff)
   }
 
   return (
@@ -87,15 +138,78 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
               </button>
             </div>
           </div>
+
+          {proposedIteration && (
+            <div className="iteration-proposal">
+              <div className="proposal-header">
+                <div className="proposal-info">
+                  <h5>💡 AI Suggested Improvements</h5>
+                  <p>{proposedIteration.changes.length} changes proposed</p>
+                </div>
+                <div className="proposal-actions">
+                  <button 
+                    className="diff-toggle"
+                    onClick={toggleDiffView}
+                  >
+                    {showDiff ? '📝 Show Text' : '🔍 Show Diff'}
+                  </button>
+                  <button 
+                    className="accept-btn"
+                    onClick={handleAcceptIteration}
+                  >
+                    ✅ Accept
+                  </button>
+                  <button 
+                    className="reject-btn"
+                    onClick={handleRejectIteration}
+                  >
+                    ❌ Reject
+                  </button>
+                </div>
+              </div>
+
+              <div className="changes-summary">
+                <h6>📋 Summary of Changes:</h6>
+                <ul>
+                  {proposedIteration.changes.map((change, index) => (
+                    <li key={index}>{change}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
           <div className="panel-content">
-            <textarea
-              className="enhanced-text-editor"
-              value={editableText}
-              onChange={handleTextChange}
-              placeholder="Enhanced text will appear here..."
-              disabled={disabled}
-              spellCheck={true}
-            />
+            {proposedIteration && showDiff ? (
+              <div className="diff-view">
+                {createSimpleDiff(editableText, proposedIteration.newText).map((diffItem, index) => (
+                  <div key={index} className={`diff-line diff-${diffItem.type}`}>
+                    <span className="line-number">{diffItem.lineNum}</span>
+                    {diffItem.type === 'changed' && (
+                      <>
+                        <div className="diff-removed">- {diffItem.original}</div>
+                        <div className="diff-added">+ {diffItem.new}</div>
+                      </>
+                    )}
+                    {diffItem.type === 'removed' && (
+                      <div className="diff-removed">- {diffItem.original}</div>
+                    )}
+                    {diffItem.type === 'added' && (
+                      <div className="diff-added">+ {diffItem.new}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <textarea
+                className="enhanced-text-editor"
+                value={proposedIteration && !showDiff ? proposedIteration.newText : editableText}
+                onChange={handleTextChange}
+                placeholder="Enhanced text will appear here..."
+                disabled={disabled || (proposedIteration && !showDiff)}
+                spellCheck={true}
+              />
+            )}
           </div>
         </div>
       </div>

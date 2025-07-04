@@ -5,11 +5,12 @@ import MaterialDialog from './components/MaterialDialog.tsx'
 import SuccessDialog from './components/SuccessDialog.tsx'
 import APIKeyInput from './components/APIKeyInput.tsx'
 import LanguageSelector from './components/LanguageSelector.tsx'
-import type { Language } from './components/LanguageSelector.tsx'
 import FileUpload from './components/FileUpload.tsx'
 import PDFSplitView from './components/PDFSplitView.tsx'
+import InteractiveReview from './components/InteractiveReview.tsx'
 import SaveOptions from './components/SaveOptions.tsx'
 import { improvePDFWithGemini } from './services/geminiService.ts'
+import type { GeminiResult, Language } from './services/geminiService.ts'
 import './App.css'
 
 interface ProcessingState {
@@ -30,9 +31,11 @@ function App() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState<string>('')
   const [improvedText, setImprovedText] = useState<string>('')
+  const [originalText, setOriginalText] = useState<string>('') // Store original extracted text
   const [hasUserSaved, setHasUserSaved] = useState<boolean>(false) // Track if user has saved
   const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false) // Success dialog state
   const [savedFileName, setSavedFileName] = useState<string>('') // Track saved filename
+  const [proposedIteration, setProposedIteration] = useState<{ newText: string; changes: string[] } | null>(null) // Track proposed changes
   
   // Processing state
   const [processing, setProcessing] = useState<ProcessingState>({
@@ -110,6 +113,7 @@ function App() {
     setUploadedFile(null)
     setFileName('')
     setImprovedText('')
+    setOriginalText('')
     setHasUserSaved(false)
     setShowSuccessDialog(false)
     setSavedFileName('')
@@ -127,6 +131,7 @@ function App() {
     setFileName(file.name)
     setUploadedFile(file)
     setImprovedText('') // Clear previous improved text
+    setOriginalText('') // Clear previous original text
     setHasUserSaved(false) // Reset save status
     setProcessing({ processing: false, error: null })
     setOpenDialog(null)
@@ -141,8 +146,9 @@ function App() {
     setOpenDialog(null)
     
     try {
-      const improved = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage)
-      setImprovedText(improved)
+      const result: GeminiResult = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage)
+      setImprovedText(result.improvedText)
+      setOriginalText(result.originalText) // Store original text for interactive review
       setCurrentStep('review')
     } catch (error: unknown) {
       setProcessing({ 
@@ -163,6 +169,21 @@ function App() {
 
   const closeDialog = () => {
     setOpenDialog(null)
+  }
+
+  const handleIterationProposed = (result: { newText: string; changes: string[] }) => {
+    setProposedIteration(result)
+  }
+
+  const handleIterationAccepted = () => {
+    if (proposedIteration) {
+      setImprovedText(proposedIteration.newText)
+      setProposedIteration(null)
+    }
+  }
+
+  const handleIterationRejected = () => {
+    setProposedIteration(null)
   }
 
   const getMainContent = () => {
@@ -191,7 +212,21 @@ function App() {
             onTextChange={handleTextChange}
             disabled={false}
             onFileSaved={handleFileSaved}
+            proposedIteration={proposedIteration}
+            onIterationAccepted={handleIterationAccepted}
+            onIterationRejected={handleIterationRejected}
           />
+          
+          <div className="ai-review-wrapper">
+            <InteractiveReview
+              originalText={originalText}
+              improvedText={improvedText}
+              currentEditorText={improvedText}
+              apiKey={apiKey}
+              onTextUpdated={handleTextChange}
+              onIterationProposed={handleIterationProposed}
+            />
+          </div>
         </div>
       )
     }

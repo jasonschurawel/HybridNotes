@@ -109,8 +109,10 @@
 .main-content.review {
   padding: 0;
   align-items: stretch;
+  flex-direction: column;
   width: 100%;
   max-width: none; /* Remove any width constraints */
+  height: 100vh; /* Use viewport height */
 }
 
 /* Welcome Card */
@@ -372,6 +374,30 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   margin-top: 8px;
+}
+
+/* AI Review Wrapper */
+.ai-review-wrapper {
+  margin-top: 2rem;
+  margin-bottom: 4rem;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: 1200px;
+}
+
+@media (max-width: 768px) {
+  .ai-review-wrapper {
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
 }
 
 /* Animations */

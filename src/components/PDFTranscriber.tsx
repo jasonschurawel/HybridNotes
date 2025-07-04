@@ -6,8 +6,8 @@ import LanguageSelector from './LanguageSelector.tsx'
 import AdditionalNotes from './AdditionalNotes.tsx'
 import SaveOptions from './SaveOptions.tsx'
 import PDFSplitView from './PDFSplitView.tsx'
-import type { Language } from './LanguageSelector.tsx'
 import { improvePDFWithGemini } from '../services/geminiService.ts'
+import type { Language } from '../services/geminiService.ts'
 import './PDFTranscriber.css'
 
 interface ProcessingState {
@@ -58,8 +58,8 @@ const PDFTranscriber: React.FC = () => {
     setProcessing({ processing: true, error: null })
     
     try {
-      const improved = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage)
-      setImprovedText(improved)
+      const result = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage)
+      setImprovedText(result.improvedText)
     } catch (error: unknown) {
       setProcessing({ 
         processing: false,

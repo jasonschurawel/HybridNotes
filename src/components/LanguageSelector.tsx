@@ -1,7 +1,6 @@
 import React from 'react'
+import type { Language } from '../services/geminiService'
 import './LanguageSelector.css'
-
-export type Language = 'english' | 'german' | 'french' | 'russian'
 
 interface LanguageSelectorProps {
   selectedLanguage: Language
@@ -13,7 +12,22 @@ const languages: { value: Language; label: string; flag: string }[] = [
   { value: 'english', label: 'English', flag: '🇺🇸' },
   { value: 'german', label: 'Deutsch', flag: '🇩🇪' },
   { value: 'french', label: 'Français', flag: '🇫🇷' },
-  { value: 'russian', label: 'Русский', flag: '🇷🇺' },
+  { value: 'spanish', label: 'Español', flag: '🇪🇸' },
+  { value: 'italian', label: 'Italiano', flag: '🇮🇹' },
+  { value: 'portuguese', label: 'Português', flag: '🇵🇹' },
+  { value: 'dutch', label: 'Nederlands', flag: '🇳🇱' },
+  { value: 'polish', label: 'Polski', flag: '🇵🇱' },
+  { value: 'czech', label: 'Čeština', flag: '🇨🇿' },
+  { value: 'slovak', label: 'Slovenčina', flag: '🇸🇰' },
+  { value: 'hungarian', label: 'Magyar', flag: '🇭🇺' },
+  { value: 'romanian', label: 'Română', flag: '🇷🇴' },
+  { value: 'bulgarian', label: 'Български', flag: '🇧🇬' },
+  { value: 'croatian', label: 'Hrvatski', flag: '🇭🇷' },
+  { value: 'serbian', label: 'Српски', flag: '🇷🇸' },
+  { value: 'slovenian', label: 'Slovenščina', flag: '🇸🇮' },
+  { value: 'estonian', label: 'Eesti', flag: '🇪🇪' },
+  { value: 'latvian', label: 'Latviešu', flag: '🇱🇻' },
+  { value: 'lithuanian', label: 'Lietuvių', flag: '🇱🇹' },
 ]
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
