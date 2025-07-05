@@ -55,6 +55,7 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
       // Auto-start the review when agent is ready
       initializeReview(newAgent)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKey, originalText, improvedText])
 
   const initializeReview = useCallback(async (agentToUse: EnhancedConversationAgent) => {
@@ -74,6 +75,7 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
     } finally {
       setIsLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

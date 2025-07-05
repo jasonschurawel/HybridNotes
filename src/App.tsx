@@ -255,6 +255,7 @@ function App() {
               improvedText={improvedText}
               currentEditorText={improvedText}
               apiKey={apiKey}
+              language={selectedLanguage}
               onIterationProposed={handleIterationProposed}
             />
           </div>

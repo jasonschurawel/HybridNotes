@@ -642,8 +642,17 @@
   background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
   border: 2px solid #4caf50;
   border-radius: 8px;
-  margin-bottom: 1rem;
   animation: slideDown 0.3s ease-out;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.iteration-proposal.collapsed {
+  max-height: 80px;
+}
+
+.iteration-proposal.expanded {
+  max-height: none;
 }
 
 @keyframes slideDown {
@@ -662,8 +671,15 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1rem;
-  border-bottom: 1px solid #c8e6c9;
   gap: 1rem;
+}
+
+.iteration-proposal.expanded .proposal-header {
+  border-bottom: 1px solid #c8e6c9;
+}
+
+.iteration-proposal.collapsed .proposal-header {
+  border-bottom: none;
 }
 
 .proposal-info h5 {
@@ -685,6 +701,7 @@
   flex-shrink: 0;
 }
 
+.collapse-btn,
 .diff-toggle,
 .accept-btn,
 .reject-btn {
@@ -696,6 +713,17 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.collapse-btn {
+  background: #9e9e9e;
+  color: white;
+  min-width: 44px;
+}
+
+.collapse-btn:hover {
+  background: #757575;
+  transform: translateY(-1px);
 }
 
 .diff-toggle {

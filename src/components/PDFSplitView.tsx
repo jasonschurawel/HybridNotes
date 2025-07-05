@@ -57,6 +57,7 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
   const [editableText, setEditableText] = useState(enhancedText)
   const [currentView, setCurrentView] = useState<'original' | 'enhanced' | 'diff'>('enhanced')
   const [displayMode, setDisplayMode] = useState<'raw' | 'markdown'>('markdown')
+  const [isIterationCollapsed, setIsIterationCollapsed] = useState(true) // Start collapsed by default
   const enhancedTextareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Update editable text when enhanced text changes
@@ -185,6 +186,10 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
     }
   }
 
+  const toggleIterationCollapse = () => {
+    setIsIterationCollapsed(!isIterationCollapsed)
+  }
+
   const toggleDisplayMode = () => {
     setDisplayMode(displayMode === 'raw' ? 'markdown' : 'raw')
   }
@@ -253,6 +258,7 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
           originalFileName={fileName}
           disabled={disabled}
           onFileSaved={onFileSaved}
+          markdownContent={renderMarkdown(editableText)}
         />
       </div>
       
@@ -297,7 +303,7 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
                 title={`Switch to ${displayMode === 'raw' ? 'markdown' : 'raw'} view`}
                 disabled={disabled || currentView !== 'enhanced'}
               >
-                {displayMode === 'raw' ? '📝 Raw' : '🎨 Markdown'}
+                {displayMode === 'raw' ? '🎨 Markdown' : '📝 Raw'}
               </button>
               <button 
                 className="copy-button"
@@ -311,13 +317,20 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
           </div>
 
           {proposedIteration && (
-            <div className="iteration-proposal">
+            <div className={`iteration-proposal ${isIterationCollapsed ? 'collapsed' : 'expanded'}`}>
               <div className="proposal-header">
                 <div className="proposal-info">
-                  <h5>💡 AI Suggested Improvements</h5>
+                  <h5>💡 Applied Edits</h5>
                   <p>{proposedIteration.changes.length} changes proposed</p>
                 </div>
                 <div className="proposal-actions">
+                  <button 
+                    className="collapse-btn"
+                    onClick={toggleIterationCollapse}
+                    title={isIterationCollapsed ? "Expand edits" : "Collapse edits"}
+                  >
+                    {isIterationCollapsed ? '▼' : '▲'}
+                  </button>
                   <button 
                     className="accept-btn"
                     onClick={handleAcceptIteration}
@@ -333,14 +346,16 @@ const PDFSplitView: React.FC<PDFSplitViewProps> = ({
                 </div>
               </div>
 
-              <div className="changes-summary">
-                <h6>📋 Summary of Changes:</h6>
-                <ul>
-                  {proposedIteration.changes.map((change, index) => (
-                    <li key={index}>{change}</li>
-                  ))}
-                </ul>
-              </div>
+              {!isIterationCollapsed && (
+                <div className="changes-summary">
+                  <h6>📋 Summary of Changes:</h6>
+                  <ul>
+                    {proposedIteration.changes.map((change, index) => (
+                      <li key={index}>{change}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 

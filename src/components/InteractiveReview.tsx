@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { EnhancedConversationAgent } from '../services/conversationService'
+import { EnhancedConversationAgent, localization } from '../services/conversationService'
 import type { EnhancedConversationState, TheoryStatement, ReviewPhase } from '../services/conversationService'
+import type { Language } from '../services/geminiService'
 import './InteractiveReview.css'
+
+// Helper function to get localized strings
+const getLocalizedStrings = (language: Language) => {
+  return localization[language] || localization.english
+}
 
 interface InteractiveReviewProps {
   originalText: string
   improvedText: string
   apiKey: string
+  language: Language
   currentEditorText?: string
   onIterationProposed?: (result: { newText: string; changes: string[] }) => void
 }
@@ -25,13 +32,359 @@ interface PhaseQuestion {
   required: boolean
 }
 
+// Language-specific question sets
+const getQuestionSets = (language: Language): Record<ReviewPhase, PhaseQuestion[]> => {
+  const questionSets: Partial<Record<Language, Record<ReviewPhase, PhaseQuestion[]>>> = {
+    english: {
+      metadata: [
+        {
+          id: 'document_type',
+          question: 'What type of document is this?',
+          type: 'select',
+          options: [
+            { id: 'lecture', text: '🎓 Lecture Notes', value: 'lecture' },
+            { id: 'meeting', text: '💼 Meeting Minutes', value: 'meeting' },
+            { id: 'research', text: '🔬 Research Notes', value: 'research' },
+            { id: 'book', text: '📚 Book/Article Summary', value: 'book' },
+            { id: 'personal', text: '📝 Personal Notes', value: 'personal' },
+            { id: 'other', text: '📄 Other', value: 'other' }
+          ],
+          required: true
+        },
+        {
+          id: 'target_audience',
+          question: 'Who will be reading these notes?',
+          type: 'select',
+          options: [
+            { id: 'myself', text: '👤 Just me', value: 'myself' },
+            { id: 'team', text: '👥 My team/colleagues', value: 'team' },
+            { id: 'students', text: '🎓 Students', value: 'students' },
+            { id: 'clients', text: '💼 Clients/stakeholders', value: 'clients' },
+            { id: 'public', text: '🌐 General public', value: 'public' }
+          ],
+          required: true
+        },
+        {
+          id: 'primary_purpose',
+          question: 'What\'s the main purpose of these notes?',
+          type: 'select',
+          options: [
+            { id: 'study', text: '📖 Study/Review', value: 'study' },
+            { id: 'reference', text: '📋 Quick Reference', value: 'reference' },
+            { id: 'action', text: '✅ Action Items', value: 'action' },
+            { id: 'knowledge', text: '🧠 Knowledge Base', value: 'knowledge' },
+            { id: 'sharing', text: '🤝 Sharing Information', value: 'sharing' }
+          ],
+          required: true
+        }
+      ],
+      verification: [
+        {
+          id: 'content_accuracy',
+          question: 'How accurate is the transcribed content compared to the original?',
+          type: 'select',
+          options: [
+            { id: 'excellent', text: '✅ Excellent - Very accurate', value: 'excellent' },
+            { id: 'good', text: '👍 Good - Mostly accurate', value: 'good' },
+            { id: 'fair', text: '⚠️ Fair - Some inaccuracies', value: 'fair' },
+            { id: 'poor', text: '❌ Poor - Many errors', value: 'poor' }
+          ],
+          required: true
+        },
+        {
+          id: 'missing_content',
+          question: 'Is there any important content missing or unclear?',
+          type: 'text',
+          required: false
+        },
+        {
+          id: 'priority_topics',
+          question: 'Which topics should be emphasized more?',
+          type: 'text',
+          required: false
+        }
+      ],
+      customization: [
+        {
+          id: 'preferred_format',
+          question: 'How do you prefer your notes to be formatted?',
+          type: 'multiselect',
+          options: [
+            { id: 'bullets', text: '• Bullet points', value: 'bullets' },
+            { id: 'numbered', text: '1. Numbered lists', value: 'numbered' },
+            { id: 'headings', text: '📋 Clear headings', value: 'headings' },
+            { id: 'paragraphs', text: '📄 Paragraphs', value: 'paragraphs' },
+            { id: 'tables', text: '📊 Tables/charts', value: 'tables' },
+            { id: 'summaries', text: '📝 Section summaries', value: 'summaries' }
+          ],
+          required: true
+        },
+        {
+          id: 'detail_level',
+          question: 'How detailed should the notes be?',
+          type: 'select',
+          options: [
+            { id: 'minimal', text: '🎯 Minimal - Key points only', value: 'minimal' },
+            { id: 'moderate', text: '📋 Moderate - Main ideas + details', value: 'moderate' },
+            { id: 'comprehensive', text: '📚 Comprehensive - Everything important', value: 'comprehensive' }
+          ],
+          required: true
+        },
+        {
+          id: 'special_requirements',
+          question: 'Any special formatting or style requirements?',
+          type: 'text',
+          required: false
+        }
+      ]
+    },
+    german: {
+      metadata: [
+        {
+          id: 'document_type',
+          question: 'Welche Art von Dokument ist das?',
+          type: 'select',
+          options: [
+            { id: 'lecture', text: '🎓 Vorlesungsnotizen', value: 'lecture' },
+            { id: 'meeting', text: '💼 Besprechungsprotokoll', value: 'meeting' },
+            { id: 'research', text: '🔬 Forschungsnotizen', value: 'research' },
+            { id: 'book', text: '📚 Buch-/Artikelzusammenfassung', value: 'book' },
+            { id: 'personal', text: '📝 Persönliche Notizen', value: 'personal' },
+            { id: 'other', text: '📄 Andere', value: 'other' }
+          ],
+          required: true
+        },
+        {
+          id: 'target_audience',
+          question: 'Wer wird diese Notizen lesen?',
+          type: 'select',
+          options: [
+            { id: 'myself', text: '👤 Nur ich', value: 'myself' },
+            { id: 'team', text: '👥 Mein Team/Kollegen', value: 'team' },
+            { id: 'students', text: '🎓 Studenten', value: 'students' },
+            { id: 'clients', text: '💼 Kunden/Stakeholder', value: 'clients' },
+            { id: 'public', text: '🌐 Allgemeine Öffentlichkeit', value: 'public' }
+          ],
+          required: true
+        },
+        {
+          id: 'primary_purpose',
+          question: 'Was ist der Hauptzweck dieser Notizen?',
+          type: 'select',
+          options: [
+            { id: 'study', text: '📖 Lernen/Wiederholen', value: 'study' },
+            { id: 'reference', text: '📋 Schnelle Referenz', value: 'reference' },
+            { id: 'action', text: '✅ Aufgaben', value: 'action' },
+            { id: 'knowledge', text: '🧠 Wissensbasis', value: 'knowledge' },
+            { id: 'sharing', text: '🤝 Informationen teilen', value: 'sharing' }
+          ],
+          required: true
+        }
+      ],
+      verification: [
+        {
+          id: 'content_accuracy',
+          question: 'Wie genau ist der transkribierte Inhalt im Vergleich zum Original?',
+          type: 'select',
+          options: [
+            { id: 'excellent', text: '✅ Ausgezeichnet - Sehr genau', value: 'excellent' },
+            { id: 'good', text: '👍 Gut - Meist genau', value: 'good' },
+            { id: 'fair', text: '⚠️ Mittelmäßig - Einige Ungenauigkeiten', value: 'fair' },
+            { id: 'poor', text: '❌ Schlecht - Viele Fehler', value: 'poor' }
+          ],
+          required: true
+        },
+        {
+          id: 'missing_content',
+          question: 'Gibt es wichtige Inhalte, die fehlen oder unklar sind?',
+          type: 'text',
+          required: false
+        },
+        {
+          id: 'priority_topics',
+          question: 'Welche Themen sollten stärker betont werden?',
+          type: 'text',
+          required: false
+        }
+      ],
+      customization: [
+        {
+          id: 'preferred_format',
+          question: 'Wie möchten Sie Ihre Notizen formatiert haben?',
+          type: 'multiselect',
+          options: [
+            { id: 'bullets', text: '• Aufzählungspunkte', value: 'bullets' },
+            { id: 'numbered', text: '1. Nummerierte Listen', value: 'numbered' },
+            { id: 'headings', text: '📋 Klare Überschriften', value: 'headings' },
+            { id: 'paragraphs', text: '📄 Absätze', value: 'paragraphs' },
+            { id: 'tables', text: '📊 Tabellen/Diagramme', value: 'tables' },
+            { id: 'summaries', text: '📝 Abschnittszusammenfassungen', value: 'summaries' }
+          ],
+          required: true
+        },
+        {
+          id: 'detail_level',
+          question: 'Wie detailliert sollen die Notizen sein?',
+          type: 'select',
+          options: [
+            { id: 'minimal', text: '🎯 Minimal - Nur Kernpunkte', value: 'minimal' },
+            { id: 'moderate', text: '📋 Moderat - Hauptideen + Details', value: 'moderate' },
+            { id: 'comprehensive', text: '📚 Umfassend - Alles Wichtige', value: 'comprehensive' }
+          ],
+          required: true
+        },
+        {
+          id: 'special_requirements',
+          question: 'Besondere Formatierungs- oder Stilanforderungen?',
+          type: 'text',
+          required: false
+        }
+      ]
+    },
+    french: {
+      metadata: [
+        {
+          id: 'document_type',
+          question: 'Quel type de document est-ce ?',
+          type: 'select',
+          options: [
+            { id: 'lecture', text: '🎓 Notes de cours', value: 'lecture' },
+            { id: 'meeting', text: '💼 Procès-verbal de réunion', value: 'meeting' },
+            { id: 'research', text: '🔬 Notes de recherche', value: 'research' },
+            { id: 'book', text: '📚 Résumé de livre/article', value: 'book' },
+            { id: 'personal', text: '📝 Notes personnelles', value: 'personal' },
+            { id: 'other', text: '📄 Autre', value: 'other' }
+          ],
+          required: true
+        },
+        {
+          id: 'target_audience',
+          question: 'Qui va lire ces notes ?',
+          type: 'select',
+          options: [
+            { id: 'myself', text: '👤 Juste moi', value: 'myself' },
+            { id: 'team', text: '👥 Mon équipe/collègues', value: 'team' },
+            { id: 'students', text: '🎓 Étudiants', value: 'students' },
+            { id: 'clients', text: '💼 Clients/parties prenantes', value: 'clients' },
+            { id: 'public', text: '🌐 Grand public', value: 'public' }
+          ],
+          required: true
+        },
+        {
+          id: 'primary_purpose',
+          question: 'Quel est l\'objectif principal de ces notes ?',
+          type: 'select',
+          options: [
+            { id: 'study', text: '📖 Étude/Révision', value: 'study' },
+            { id: 'reference', text: '📋 Référence rapide', value: 'reference' },
+            { id: 'action', text: '✅ Éléments d\'action', value: 'action' },
+            { id: 'knowledge', text: '🧠 Base de connaissances', value: 'knowledge' },
+            { id: 'sharing', text: '🤝 Partage d\'informations', value: 'sharing' }
+          ],
+          required: true
+        }
+      ],
+      verification: [
+        {
+          id: 'content_accuracy',
+          question: 'Quelle est la précision du contenu transcrit par rapport à l\'original ?',
+          type: 'select',
+          options: [
+            { id: 'excellent', text: '✅ Excellent - Très précis', value: 'excellent' },
+            { id: 'good', text: '👍 Bon - Principalement précis', value: 'good' },
+            { id: 'fair', text: '⚠️ Correct - Quelques imprécisions', value: 'fair' },
+            { id: 'poor', text: '❌ Médiocre - Beaucoup d\'erreurs', value: 'poor' }
+          ],
+          required: true
+        },
+        {
+          id: 'missing_content',
+          question: 'Y a-t-il du contenu important manquant ou peu clair ?',
+          type: 'text',
+          required: false
+        },
+        {
+          id: 'priority_topics',
+          question: 'Quels sujets devraient être davantage mis en évidence ?',
+          type: 'text',
+          required: false
+        }
+      ],
+      customization: [
+        {
+          id: 'preferred_format',
+          question: 'Comment préférez-vous que vos notes soient formatées ?',
+          type: 'multiselect',
+          options: [
+            { id: 'bullets', text: '• Points à puces', value: 'bullets' },
+            { id: 'numbered', text: '1. Listes numérotées', value: 'numbered' },
+            { id: 'headings', text: '📋 Titres clairs', value: 'headings' },
+            { id: 'paragraphs', text: '📄 Paragraphes', value: 'paragraphs' },
+            { id: 'tables', text: '📊 Tableaux/graphiques', value: 'tables' },
+            { id: 'summaries', text: '📝 Résumés de section', value: 'summaries' }
+          ],
+          required: true
+        },
+        {
+          id: 'detail_level',
+          question: 'Quel niveau de détail pour les notes ?',
+          type: 'select',
+          options: [
+            { id: 'minimal', text: '🎯 Minimal - Points clés seulement', value: 'minimal' },
+            { id: 'moderate', text: '📋 Modéré - Idées principales + détails', value: 'moderate' },
+            { id: 'comprehensive', text: '📚 Complet - Tout ce qui est important', value: 'comprehensive' }
+          ],
+          required: true
+        },
+        {
+          id: 'special_requirements',
+          question: 'Exigences spéciales de formatage ou de style ?',
+          type: 'text',
+          required: false
+        }
+      ]
+    },
+    // Add simplified question sets for other languages (using English structure with translated text)
+    spanish: {
+      metadata: [
+        { id: 'document_type', question: '¿Qué tipo de documento es este?', type: 'select', options: [{ id: 'lecture', text: '🎓 Notas de clase', value: 'lecture' }, { id: 'meeting', text: '💼 Actas de reunión', value: 'meeting' }, { id: 'research', text: '🔬 Notas de investigación', value: 'research' }, { id: 'book', text: '📚 Resumen de libro/artículo', value: 'book' }, { id: 'personal', text: '📝 Notas personales', value: 'personal' }, { id: 'other', text: '📄 Otro', value: 'other' }], required: true },
+        { id: 'target_audience', question: '¿Quién leerá estas notas?', type: 'select', options: [{ id: 'myself', text: '👤 Solo yo', value: 'myself' }, { id: 'team', text: '👥 Mi equipo/colegas', value: 'team' }, { id: 'students', text: '🎓 Estudiantes', value: 'students' }, { id: 'clients', text: '💼 Clientes/interesados', value: 'clients' }, { id: 'public', text: '🌐 Público general', value: 'public' }], required: true },
+        { id: 'primary_purpose', question: '¿Cuál es el propósito principal de estas notas?', type: 'select', options: [{ id: 'study', text: '📖 Estudio/Repaso', value: 'study' }, { id: 'reference', text: '📋 Referencia rápida', value: 'reference' }, { id: 'action', text: '✅ Elementos de acción', value: 'action' }, { id: 'knowledge', text: '🧠 Base de conocimiento', value: 'knowledge' }, { id: 'sharing', text: '🤝 Compartir información', value: 'sharing' }], required: true }
+      ],
+      verification: [
+        { id: 'content_accuracy', question: '¿Qué tan preciso es el contenido transcrito comparado con el original?', type: 'select', options: [{ id: 'excellent', text: '✅ Excelente - Muy preciso', value: 'excellent' }, { id: 'good', text: '👍 Bueno - Principalmente preciso', value: 'good' }, { id: 'fair', text: '⚠️ Regular - Algunas imprecisiones', value: 'fair' }, { id: 'poor', text: '❌ Malo - Muchos errores', value: 'poor' }], required: true },
+        { id: 'missing_content', question: '¿Hay algún contenido importante que falte o no esté claro?', type: 'text', required: false },
+        { id: 'priority_topics', question: '¿Qué temas deberían enfatizarse más?', type: 'text', required: false }
+      ],
+      customization: [
+        { id: 'preferred_format', question: '¿Cómo prefieres que se formateen tus notas?', type: 'multiselect', options: [{ id: 'bullets', text: '• Viñetas', value: 'bullets' }, { id: 'numbered', text: '1. Listas numeradas', value: 'numbered' }, { id: 'headings', text: '📋 Encabezados claros', value: 'headings' }, { id: 'paragraphs', text: '📄 Párrafos', value: 'paragraphs' }, { id: 'tables', text: '📊 Tablas/gráficos', value: 'tables' }, { id: 'summaries', text: '📝 Resúmenes de sección', value: 'summaries' }], required: true },
+        { id: 'detail_level', question: '¿Qué tan detalladas deben ser las notas?', type: 'select', options: [{ id: 'minimal', text: '🎯 Mínimo - Solo puntos clave', value: 'minimal' }, { id: 'moderate', text: '📋 Moderado - Ideas principales + detalles', value: 'moderate' }, { id: 'comprehensive', text: '📚 Completo - Todo lo importante', value: 'comprehensive' }], required: true },
+        { id: 'special_requirements', question: '¿Algún requisito especial de formato o estilo?', type: 'text', required: false }
+      ]
+    }
+  }
+
+  // For languages not fully translated, use English as fallback
+  return questionSets[language] || questionSets.english!
+}
+
 const InteractiveReview: React.FC<InteractiveReviewProps> = ({
   originalText,
   improvedText,
   apiKey,
+  language,
   currentEditorText,
   onIterationProposed
 }) => {
+  // Get localized strings for this component
+  const localizedStrings = getLocalizedStrings(language)
+  
+  // Fallback to English UI texts if not available for current language
+  const uiTexts = localizedStrings.uiTexts || getLocalizedStrings('english').uiTexts!
+  
+  // Fallback to English phase headers if not available for current language
+  const phaseHeaders = localizedStrings.uiTexts?.phaseHeaders || getLocalizedStrings('english').uiTexts!.phaseHeaders!
+  
   const [agent, setAgent] = useState<EnhancedConversationAgent | null>(null)
   const [conversation, setConversation] = useState<EnhancedConversationState | null>(null)
   const [currentTab, setCurrentTab] = useState<'review' | 'theory'>('review')
@@ -46,23 +399,26 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
   const [suggestedOptions, setSuggestedOptions] = useState<QuestionOption[]>([])
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
   const [showCustomInput, setShowCustomInput] = useState(false)
+  const [showCorrectionChoice, setShowCorrectionChoice] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (apiKey && originalText && improvedText) {
-      const newAgent = new EnhancedConversationAgent(apiKey, originalText, improvedText)
+      const newAgent = new EnhancedConversationAgent(apiKey, originalText, improvedText, language)
       setAgent(newAgent)
       // Auto-start the review when agent is ready
       initializeReview(newAgent)
     }
-  }, [apiKey, originalText, improvedText])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey, originalText, improvedText, language])
 
   const initializeReview = useCallback(async (agentToUse: EnhancedConversationAgent) => {
     setIsLoading(true)
     try {
       await agentToUse.initializeReview()
       setConversation(agentToUse.getState())
-      const questions = getPhaseQuestions('metadata')
+      const questionSets = getQuestionSets(language)
+      const questions = questionSets.metadata
       setCurrentQuestions(questions)
       
       // Generate suggestions for the first question if it's a text question
@@ -74,124 +430,14 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
     } finally {
       setIsLoading(false)
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language])
 
   useEffect(() => {
     if (!isIterating) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [conversation?.messages, isLoading, isIterating])
-
-  // Phase definitions with structured questions
-  const getPhaseQuestions = (phase: ReviewPhase): PhaseQuestion[] => {
-    switch (phase) {
-      case 'metadata':
-        return [
-          {
-            id: 'purpose',
-            question: 'What is the primary purpose of these notes?',
-            type: 'select',
-            options: [
-              { id: 'study', text: 'Study material for exam preparation', value: 'study' },
-              { id: 'meeting', text: 'Meeting minutes or discussion notes', value: 'meeting' },
-              { id: 'research', text: 'Research notes for a project', value: 'research' },
-              { id: 'lecture', text: 'Lecture or presentation notes', value: 'lecture' },
-              { id: 'reference', text: 'Reference material for future use', value: 'reference' },
-              { id: 'other', text: 'Other (please specify in next question)', value: 'other' }
-            ],
-            required: true
-          },
-          {
-            id: 'topic',
-            question: 'What is the main topic or subject area?',
-            type: 'text',
-            required: true
-          },
-          {
-            id: 'format',
-            question: 'What format do you prefer for your notes?',
-            type: 'multiselect',
-            options: [
-              { id: 'bullets', text: 'Bullet points for easy scanning', value: 'bullets' },
-              { id: 'paragraphs', text: 'Full paragraphs for detailed explanations', value: 'paragraphs' },
-              { id: 'headings', text: 'Clear headings and sections', value: 'headings' },
-              { id: 'numbered', text: 'Numbered lists for ordered information', value: 'numbered' },
-              { id: 'tables', text: 'Tables for structured data', value: 'tables' }
-            ],
-            required: true
-          },
-          {
-            id: 'detail_level',
-            question: 'How detailed should the notes be?',
-            type: 'select',
-            options: [
-              { id: 'concise', text: 'Concise - just the key points', value: 'concise' },
-              { id: 'moderate', text: 'Moderate - important details included', value: 'moderate' },
-              { id: 'comprehensive', text: 'Comprehensive - all available information', value: 'comprehensive' }
-            ],
-            required: true
-          }
-        ]
-      
-      case 'verification':
-        return [
-          {
-            id: 'accuracy_check',
-            question: 'Are there any facts or details that seem incorrect or misunderstood?',
-            type: 'text',
-            required: false
-          },
-          {
-            id: 'missing_info',
-            question: 'Is there any important information that was missed?',
-            type: 'text',
-            required: false
-          },
-          {
-            id: 'structure_issues',
-            question: 'Are there any sections that should be reorganized?',
-            type: 'text',
-            required: false
-          },
-          {
-            id: 'emphasis_check',
-            question: 'Are the most important points properly emphasized?',
-            type: 'select',
-            options: [
-              { id: 'yes', text: 'Yes, the emphasis is appropriate', value: 'yes' },
-              { id: 'some_issues', text: 'Some important points need more emphasis', value: 'some_issues' },
-              { id: 'major_issues', text: 'Major emphasis problems throughout', value: 'major_issues' }
-            ],
-            required: true
-          }
-        ]
-      
-      case 'customization':
-        return [
-          {
-            id: 'style_preferences',
-            question: 'Do you have any specific writing style preferences?',
-            type: 'text',
-            required: false
-          },
-          {
-            id: 'specific_changes',
-            question: 'Are there any specific sections that need particular attention?',
-            type: 'text',
-            required: false
-          },
-          {
-            id: 'additional_requests',
-            question: 'Any other improvements or changes you\'d like to see?',
-            type: 'text',
-            required: false
-          }
-        ]
-      
-      default:
-        return []
-    }
-  }
 
   const generateSuggestionsForTextQuestion = useCallback(async (question: PhaseQuestion) => {
     if (!agent || question.type !== 'text') return
@@ -308,7 +554,8 @@ Example format:
 
   const switchPhase = (phase: ReviewPhase) => {
     setCurrentPhase(phase)
-    const questions = getPhaseQuestions(phase)
+    const questionSets = getQuestionSets(language)
+    const questions = questionSets[phase]
     setCurrentQuestions(questions)
     setCurrentQuestionIndex(0)
     setCurrentAnswer('')
@@ -326,14 +573,14 @@ Example format:
     
     // Auto-submit if this is a button selection (not custom text input)
     if (!showCustomInput && value) {
-      // Use setTimeout to ensure state is updated first
+      // Use setTimeout to ensure state is updated first, and pass the value directly
       setTimeout(() => {
-        handleAnswerSubmit()
+        handleAnswerSubmitWithValue(value)
       }, 100)
     }
   }
 
-  const handleAnswerSubmit = async () => {
+  const handleAnswerSubmitWithValue = async (answerValue: string | string[]) => {
     if (!agent || currentQuestionIndex >= currentQuestions.length) return
 
     const currentQuestion = currentQuestions[currentQuestionIndex]
@@ -343,7 +590,7 @@ Example format:
       ...prev,
       [currentPhase]: {
         ...prev[currentPhase],
-        [currentQuestion.id]: currentAnswer
+        [currentQuestion.id]: answerValue
       }
     }))
 
@@ -352,12 +599,13 @@ Example format:
       // Process this single answer immediately into issues identification
       const response = {
         question: currentQuestion.question,
-        answer: Array.isArray(currentAnswer) ? currentAnswer.join(', ') : currentAnswer,
+        answer: Array.isArray(answerValue) ? answerValue.join(', ') : answerValue,
         questionId: currentQuestion.id
       }
 
       await agent.processPhaseResponses(currentPhase, [response])
       const updatedState = agent.getState()
+      
       setConversation(updatedState)
       setTheoryStatements(updatedState.theoryStatements || [])
 
@@ -400,7 +648,8 @@ Example format:
       // Move to next phase
       const nextPhase = phases[currentIndex + 1]
       setCurrentPhase(nextPhase)
-      const questions = getPhaseQuestions(nextPhase)
+      const questionSets = getQuestionSets(language)
+      const questions = questionSets[nextPhase]
       setCurrentQuestions(questions)
       setCurrentQuestionIndex(0)
       setCurrentAnswer('')
@@ -492,22 +741,29 @@ Example format:
     }
   }
 
-  const applyCorrectionsToEditor = async () => {
+  const applyCorrectionsToEditor = async (useOriginalAsBase: boolean = false) => {
     if (!agent || !onIterationProposed) return
     
     setIsIterating(true)
+    setShowCorrectionChoice(false)
     
+    // Auto-scroll down when starting to apply changes
     setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, 10)
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+    }, 100)
     
     try {
-      const result = await agent.applyTheoryToText(currentEditorText || improvedText)
+      const result = await agent.applyTheoryToTextWithChoice(currentEditorText || improvedText, useOriginalAsBase)
       onIterationProposed(result)
     } catch (error) {
       console.error('Error applying theory:', error)
     } finally {
       setIsIterating(false)
+      
+      // Scroll up when finished (keeping existing behavior)
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
     }
   }
 
@@ -556,13 +812,13 @@ Example format:
             {isGeneratingSuggestions && (
               <div className="generating-suggestions">
                 <div className="loading-spinner"></div>
-                <span>Generating suggestions...</span>
+                <span>{uiTexts.generatingSuggestions}</span>
               </div>
             )}
             
             {suggestedOptions.length > 0 && !showCustomInput && (
               <div className="suggested-options">
-                <p className="suggestions-label">💡 Suggested answers:</p>
+                <p className="suggestions-label">💡 {uiTexts.suggestedAnswers}</p>
                 <div className="question-buttons">
                   {suggestedOptions.map(option => (
                     <button
@@ -578,7 +834,7 @@ Example format:
                   className="custom-input-btn"
                   onClick={() => setShowCustomInput(true)}
                 >
-                  ✏️ None of these fit - I'll type my own
+                  ✏️ {uiTexts.customOption}
                 </button>
               </div>
             )}
@@ -593,7 +849,7 @@ Example format:
                       setCurrentAnswer('')
                     }}
                   >
-                    ⬅️ Back to suggestions
+                    ⬅️ {uiTexts.backToSuggestions}
                   </button>
                 )}
                 <textarea
@@ -640,7 +896,7 @@ Example format:
             className={`main-tab-btn ${currentTab === 'theory' ? 'active' : ''}`}
             onClick={() => setCurrentTab('theory')}
           >
-            ✅ Correct ({theoryStatements.length})
+            {localizedStrings.buttonLabels.correct} ({theoryStatements.length})
           </button>
         </div>
       </div>
@@ -653,19 +909,19 @@ Example format:
                 className={`segment-btn ${currentPhase === 'metadata' ? 'active' : ''}`}
                 onClick={() => switchPhase('metadata')}
               >
-                📋 Metadata
+                📋 {localizedStrings.phaseNames.metadata}
               </button>
               <button 
                 className={`segment-btn ${currentPhase === 'verification' ? 'active' : ''}`}
                 onClick={() => switchPhase('verification')}
               >
-                🔍 Verification
+                🔍 {localizedStrings.phaseNames.verification}
               </button>
               <button 
                 className={`segment-btn ${currentPhase === 'customization' ? 'active' : ''}`}
                 onClick={() => switchPhase('customization')}
               >
-                🎨 Customization
+                🎨 {localizedStrings.phaseNames.customization}
               </button>
             </div>
           </div>
@@ -673,20 +929,20 @@ Example format:
           <div className="phase-content">
             <div className="phase-header">
               <h4>
-                {currentPhase === 'metadata' && '📋 Note Metadata & Format'}
-                {currentPhase === 'verification' && '🔍 Content Verification'}
-                {currentPhase === 'customization' && '🎨 Custom Preferences'}
+                {currentPhase === 'metadata' && `📋 ${phaseHeaders.metadata.title}`}
+                {currentPhase === 'verification' && `🔍 ${phaseHeaders.verification.title}`}
+                {currentPhase === 'customization' && `🎨 ${phaseHeaders.customization.title}`}
               </h4>
               <p>
-                {currentPhase === 'metadata' && 'Help me understand what these notes are for and how you like them structured.'}
-                {currentPhase === 'verification' && 'Let\'s verify that I understood your content correctly and didn\'t miss anything important.'}
-                {currentPhase === 'customization' && 'Tell me about any specific changes or customizations you\'d like to make.'}
+                {currentPhase === 'metadata' && phaseHeaders.metadata.subtitle}
+                {currentPhase === 'verification' && phaseHeaders.verification.subtitle}
+                {currentPhase === 'customization' && phaseHeaders.customization.subtitle}
               </p>
             </div>
 
             <div className="question-progress">
               <div className="progress-indicator">
-                Question {currentQuestionIndex + 1} of {currentQuestions.length}
+                {uiTexts.questionProgress.replace('{current}', (currentQuestionIndex + 1).toString()).replace('{total}', currentQuestions.length.toString())}
               </div>
               <div className="progress-bar">
                 <div 
@@ -712,7 +968,7 @@ Example format:
                     onClick={moveToPreviousQuestion}
                     disabled={isFirstQuestion()}
                   >
-                    ⬅️ Previous
+                    ⬅️ {localizedStrings.buttonLabels.back}
                   </button>
                   
                   <button 
@@ -720,17 +976,17 @@ Example format:
                     onClick={handleSkipQuestion}
                     disabled={isLoading}
                   >
-                    ⏭️ Skip
+                    ⏭️ {localizedStrings.buttonLabels.skip}
                   </button>
                   
                   {/* Only show Answer & Next button for custom text input or non-text questions */}
                   {(showCustomInput || getCurrentQuestion()?.type !== 'text') && (
                     <button 
                       className="action-btn answer-btn"
-                      onClick={handleAnswerSubmit}
+                      onClick={() => handleAnswerSubmitWithValue(currentAnswer)}
                       disabled={isLoading || (!currentAnswer && getCurrentQuestion()!.required)}
                     >
-                      {isLoading ? 'Processing...' : (isLastQuestion() ? '✅ Finish' : '➡️ Answer & Next')}
+                      {isLoading ? uiTexts.processing : (isLastQuestion() ? `✅ ${uiTexts.finish}` : `➡️ ${uiTexts.answerNext}`)}
                     </button>
                   )}
                 </div>
@@ -738,11 +994,10 @@ Example format:
             )}
 
             {currentQuestionIndex >= currentQuestions.length && (
-              <div className="phase-complete">
-                <div className="completion-message">
-                  <h5>🎉 {currentPhase.charAt(0).toUpperCase() + currentPhase.slice(1)} Phase Complete!</h5>
-                  <p>You can switch to another phase or check the Correct tab to see the issues I've identified.</p>
-                </div>
+              <div className="phase-complete">              <div className="completion-message">
+                <h5>🎉 {uiTexts.phaseComplete.replace('{phase}', localizedStrings.phaseNames[currentPhase])}</h5>
+                <p>{uiTexts.phaseCompleteDescription}</p>
+              </div>
               </div>
             )}
           </div>
@@ -752,17 +1007,16 @@ Example format:
       {currentTab === 'theory' && (
         <div className="theory-content">
           <div className="theory-header">
-            <h4>✅ Corrections Needed</h4>
+            <h4>{uiTexts.correctionsNeeded}</h4>
             <p>
-              Based on our interaction, here are the issues I've identified that need to be corrected. 
-              You can remove any issues that are incorrect.
+              {uiTexts.correctionsDescription}
             </p>
           </div>
 
           <div className="theory-list">
             {theoryStatements.length === 0 ? (
               <div className="no-theory">
-                <p>No issues identified yet. Please answer some questions in the Review tab to help me identify areas for improvement.</p>
+                <p>{uiTexts.noIssuesFound} {uiTexts.noIssuesDescription}</p>
               </div>
             ) : (
               theoryStatements.map((statement) => (
@@ -777,7 +1031,7 @@ Example format:
                   <button 
                     className="remove-statement-btn"
                     onClick={() => removeIssueStatement(statement.id)}
-                    title="Remove this statement"
+                    title={uiTexts.removeTip}
                   >
                     ❌
                   </button>
@@ -790,18 +1044,49 @@ Example format:
             <div className="theory-actions">
               <button 
                 className="apply-theory-btn"
-                onClick={applyCorrectionsToEditor}
+                onClick={() => setShowCorrectionChoice(true)}
                 disabled={isIterating}
               >
-                {isIterating ? (
-                  <>
-                    <div className="loading-spinner"></div>
-                    Correcting in Editor...
-                  </>
-                ) : (
-                  '✏️ Correct in Editor'
-                )}
+                {localizedStrings.buttonLabels.applyChanges}
               </button>
+              
+              {showCorrectionChoice && (
+                <div className="correction-choice-modal">
+                  <div className="choice-content">
+                    <h5>{localizedStrings.modalTexts.correctionChoice.title}</h5>
+                    <p>{localizedStrings.modalTexts.correctionChoice.description}</p>
+                    
+                    <div className="choice-buttons">
+                      <button 
+                        className="choice-btn primary"
+                        onClick={() => applyCorrectionsToEditor(false)}
+                      >
+                        {localizedStrings.modalTexts.correctionChoice.fromCurrent}
+                        <span className="choice-description">
+                          {localizedStrings.modalTexts.correctionChoice.fromCurrentDesc}
+                        </span>
+                      </button>
+                      
+                      <button 
+                        className="choice-btn secondary"
+                        onClick={() => applyCorrectionsToEditor(true)}
+                      >
+                        {localizedStrings.modalTexts.correctionChoice.fromOriginal}
+                        <span className="choice-description">
+                          {localizedStrings.modalTexts.correctionChoice.fromOriginalDesc}
+                        </span>
+                      </button>
+                    </div>
+                    
+                    <button 
+                      className="cancel-choice-btn"
+                      onClick={() => setShowCorrectionChoice(false)}
+                    >
+                      {localizedStrings.modalTexts.correctionChoice.cancel}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -810,6 +1095,9 @@ Example format:
               <div className="loading-message">
                 <div className="loading-spinner-large"></div>
                 <p>Applying corrections to your notes in the editor...</p>
+                <p className="loading-detail">
+                  {showCorrectionChoice ? 'Processing correction choice...' : 'This may take a moment while I incorporate all your preferences.'}
+                </p>
               </div>
             </div>
           )}
