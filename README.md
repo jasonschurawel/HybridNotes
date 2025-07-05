@@ -296,6 +296,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] **Iterative refinement of transscribed notes** based on human in the loop feedback
 - [ ] **Offline processing capabilities** for independence, security and confidential data
 - [ ] **Improved User Interface**
+- [ ] **Save PDF**
+- [ ] **Compile new Note** from Original and Issues
+- [ ] **Look if new Issue is same** as existing or they fit together
+- [ ] **Review in selected Language**
+- [ ] **Evaluation of Issues**, if they are unnecessary...
 
 ---
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { EnhancedConversationAgent } from '../services/conversationService'
 import type { EnhancedConversationState, TheoryStatement, ReviewPhase } from '../services/conversationService'
 import './InteractiveReview.css'
@@ -57,7 +57,7 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
     }
   }, [apiKey, originalText, improvedText])
 
-  const initializeReview = async (agentToUse: EnhancedConversationAgent) => {
+  const initializeReview = useCallback(async (agentToUse: EnhancedConversationAgent) => {
     setIsLoading(true)
     try {
       await agentToUse.initializeReview()
@@ -74,13 +74,13 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (!isIterating) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [conversation?.messages, isLoading])
+  }, [conversation?.messages, isLoading, isIterating])
 
   // Phase definitions with structured questions
   const getPhaseQuestions = (phase: ReviewPhase): PhaseQuestion[] => {
@@ -193,7 +193,7 @@ const InteractiveReview: React.FC<InteractiveReviewProps> = ({
     }
   }
 
-  const generateSuggestionsForTextQuestion = async (question: PhaseQuestion) => {
+  const generateSuggestionsForTextQuestion = useCallback(async (question: PhaseQuestion) => {
     if (!agent || question.type !== 'text') return
 
     setIsGeneratingSuggestions(true)
@@ -245,8 +245,8 @@ Example format:
         if (lines.length > 0) {
           const options = lines.slice(0, 5).map((line, index) => ({
             id: `suggestion-${index}`,
-            text: line.replace(/^[-*•"\[\]0-9.,\s]*/, '').replace(/["\]]*$/, '').trim(),
-            value: line.replace(/^[-*•"\[\]0-9.,\s]*/, '').replace(/["\]]*$/, '').trim()
+            text: line.replace(/^[-*•"[\]0-9.,\s]*/, '').replace(/["]*$/, '').trim(),
+            value: line.replace(/^[-*•"[\]0-9.,\s]*/, '').replace(/["]*$/, '').trim()
           })).filter(option => option.text.length > 0)
           setSuggestedOptions(options)
         } else {
@@ -263,7 +263,7 @@ Example format:
     } finally {
       setIsGeneratingSuggestions(false)
     }
-  }
+  }, [agent, originalText])
 
   const getFallbackSuggestions = (questionText: string): QuestionOption[] => {
     const question = questionText.toLowerCase()

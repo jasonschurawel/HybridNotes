@@ -368,7 +368,7 @@ Return ONLY the JSON array, no other text.`
       // Parse JSON response
       const statements = JSON.parse(response)
       
-      return statements.map((stmt: any, index: number) => ({
+      return statements.map((stmt: { category: string; statement: string; confidence: number; source: string }, index: number) => ({
         id: `${phase}_${Date.now()}_${index}`,
         category: stmt.category,
         statement: stmt.statement,
