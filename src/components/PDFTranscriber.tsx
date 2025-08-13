@@ -60,6 +60,10 @@ const PDFTranscriber: React.FC = () => {
     setProcessing({ processing: true, error: null })
     
     try {
+      // Log file size for user awareness
+      const fileSizeMB = (uploadedFile.size / 1024 / 1024).toFixed(1)
+      console.log(`Processing PDF: ${uploadedFile.name} (${fileSizeMB}MB)`)
+      
       const result = await improvePDFWithGemini(uploadedFile, apiKey, selectedLanguage)
       setImprovedText(result.improvedText)
       setOriginalText(result.originalText)

@@ -29,14 +29,121 @@ const languageNames: Record<Language, string> = {
   lithuanian: 'Lithuanian'
 }
 
-// Convert file to base64 for Gemini API
-const fileToGenerativePart = async (file: File) => {
-  const base64EncodedData = await new Promise<string>((resolve) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      const base64String = (reader.result as string).split(',')[1]
-      resolve(base64String)
+// Upload file to Google Files API for large files (50MB+)
+const uploadLargeFile = async (file: File, apiKey: string) => {
+  console.log(`Uploading large file (${(file.size / 1024 / 1024).toFixed(1)}MB) to Files API...`);
+  
+  // Create form data for multipart upload
+  const formData = new FormData();
+  
+  // Add metadata
+  const metadata = {
+    file: {
+      displayName: file.name,
+      mimeType: file.type
     }
+  };
+  
+  formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  formData.append('data', file);
+
+  try {
+    const uploadResponse = await fetch(
+      `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('Files API upload error:', errorText);
+      throw new Error(`Files API upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+    }
+
+    const uploadResult = await uploadResponse.json();
+    console.log('File uploaded successfully:', uploadResult.file.name);
+    
+    // Wait for the file to be processed
+    let fileState = 'PROCESSING';
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutes max wait time
+    
+    while (fileState === 'PROCESSING' && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+      
+      const statusResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/${uploadResult.file.name}?key=${apiKey}`
+      );
+      
+      if (statusResponse.ok) {
+        const statusResult = await statusResponse.json();
+        fileState = statusResult.state;
+        console.log(`File processing state: ${fileState}`);
+      }
+      
+      attempts++;
+    }
+    
+    if (fileState !== 'ACTIVE') {
+      throw new Error(`File processing failed. Final state: ${fileState}`);
+    }
+    
+    return {
+      fileData: {
+        fileUri: uploadResult.file.uri,
+        mimeType: file.type,
+      },
+    };
+  } catch (error) {
+    console.error('Large file upload failed:', error);
+    throw new Error(`Large file upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Convert file to base64 for Gemini API or use Files API for large files
+const fileToGenerativePart = async (file: File, apiKey: string) => {
+  // Use Files API for files larger than 50MB, base64 for smaller files
+  const largeFileThreshold = 50 * 1024 * 1024; // 50MB threshold
+  const maxFileSize = 2 * 1024 * 1024 * 1024; // 2GB maximum for Files API
+  
+  if (file.size > maxFileSize) {
+    throw new Error(`File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds the 2GB limit. Please use a smaller PDF file or split it into smaller documents.`);
+  }
+
+  // Use Files API for large files
+  if (file.size > largeFileThreshold) {
+    return await uploadLargeFile(file, apiKey);
+  }
+
+  // Use base64 for smaller files (existing implementation)
+  console.log(`Processing file (${(file.size / 1024 / 1024).toFixed(1)}MB) via base64 upload...`);
+  
+  const base64EncodedData = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    
+    // Extended timeout for large files
+    const timeout = setTimeout(() => {
+      reader.abort()
+      reject(new Error('File reading timeout. The file may be too large or corrupted.'))
+    }, 120000) // 2 minutes timeout for large files
+    
+    reader.onloadend = () => {
+      clearTimeout(timeout)
+      if (reader.result) {
+        const base64String = (reader.result as string).split(',')[1]
+        resolve(base64String)
+      } else {
+        reject(new Error('Failed to read file content'))
+      }
+    }
+    
+    reader.onerror = () => {
+      clearTimeout(timeout)
+      reject(new Error('Failed to read file'))
+    }
+    
     reader.readAsDataURL(file)
   })
 
@@ -67,9 +174,18 @@ export const improvePDFWithGemini = async (
       throw new Error('Please upload a valid PDF file')
     }
 
-    // Initialize the Gemini API
+    // Log file size for debugging
+    console.log(`Processing PDF: ${pdfFile.name}, Size: ${(pdfFile.size / 1024 / 1024).toFixed(2)}MB`)
+
+    // Initialize the Gemini API with increased timeout
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      generationConfig: {
+        // Add timeout and safety settings for large files
+        maxOutputTokens: 8192,
+      }
+    })
 
     const targetLanguage = languageNames[language]
 
@@ -94,38 +210,74 @@ Please format your response EXACTLY like this:
 
 Make sure to include both sections clearly separated by the markers.`
 
+    console.log('Converting PDF to base64...')
     // Convert PDF to base64 for Gemini
-    const imagePart = await fileToGenerativePart(pdfFile)
+    let imagePart: any;
+    try {
+      imagePart = await fileToGenerativePart(pdfFile, apiKey)
+    } catch (uploadError) {
+      throw new Error(`File processing failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
+    }
     
-    // Generate content with PDF and prompt
-    const result = await model.generateContent([prompt, imagePart])
-    const response = result.response
-    const text = response.text()
+    console.log('Sending request to Gemini API...')
+    // Add retry logic for network issues
+    let lastError: Error | null = null
+    const maxRetries = 3
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Create a timeout promise for the API call - extended for very large files
+        const apiCallPromise = model.generateContent([prompt, imagePart])
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('API request timeout after 300 seconds')), 300000) // 5 minutes for very large files
+        )
+        
+        const result = await Promise.race([apiCallPromise, timeoutPromise])
+        const response = result.response
+        const text = response.text()
 
-    // Parse the response to extract original and improved text
-    const originalMatch = text.match(/===ORIGINAL_TEXT===\s*([\s\S]*?)\s*===IMPROVED_TEXT===/)?.[1]?.trim()
-    const improvedMatch = text.match(/===IMPROVED_TEXT===\s*([\s\S]*?)(?:$|\n\n===)/)?.[1]?.trim()
+        console.log('Received response from Gemini API')
 
-    if (!originalMatch || !improvedMatch) {
-      // Fallback parsing if the format is not exact
-      const sections = text.split(/===(?:ORIGINAL_TEXT|IMPROVED_TEXT)===/)
-      if (sections.length >= 3) {
+        // Parse the response to extract original and improved text
+        const originalMatch = text.match(/===ORIGINAL_TEXT===\s*([\s\S]*?)\s*===IMPROVED_TEXT===/)?.[1]?.trim()
+        const improvedMatch = text.match(/===IMPROVED_TEXT===\s*([\s\S]*?)(?:$|\n\n===)/)?.[1]?.trim()
+
+        if (!originalMatch || !improvedMatch) {
+          // Fallback parsing if the format is not exact
+          const sections = text.split(/===(?:ORIGINAL_TEXT|IMPROVED_TEXT)===/)
+          if (sections.length >= 3) {
+            return {
+              originalText: sections[1]?.trim() || 'Could not extract original text',
+              improvedText: sections[2]?.trim() || text
+            }
+          }
+          // If parsing fails, return the full response as improved text
+          return {
+            originalText: 'Could not extract original text',
+            improvedText: text
+          }
+        }
+
         return {
-          originalText: sections[1]?.trim() || 'Could not extract original text',
-          improvedText: sections[2]?.trim() || text
+          originalText: originalMatch,
+          improvedText: improvedMatch
+        }
+      } catch (error) {
+        lastError = error as Error
+        console.warn(`Attempt ${attempt} failed:`, error)
+        
+        if (attempt < maxRetries) {
+          // Wait before retry (exponential backoff)
+          const delay = Math.pow(2, attempt) * 1000
+          console.log(`Retrying in ${delay}ms...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
         }
       }
-      // If parsing fails, return the full response as improved text
-      return {
-        originalText: 'Could not extract original text',
-        improvedText: text
-      }
     }
-
-    return {
-      originalText: originalMatch,
-      improvedText: improvedMatch
-    }
+    
+    // If all retries failed, throw the last error
+    throw lastError || new Error('All retry attempts failed')
+    
   } catch (error: unknown) {
     console.error('Error improving PDF with Gemini:', error)
     
@@ -139,6 +291,12 @@ Make sure to include both sections clearly separated by the markers.`
         throw new Error('Content was blocked for safety reasons. Please try with different text.')
       } else if (error.message?.includes('PERMISSION_DENIED')) {
         throw new Error('Permission denied. Please check your API key permissions.')
+      } else if (error.message?.includes('timeout')) {
+        throw new Error('Request timeout. Large files may take longer to process. Please try again or use a smaller file.')
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        throw new Error('Network error. Please check your internet connection and try again.')
+      } else if (error.message?.includes('exceeds the') && error.message?.includes('limit')) {
+        throw error // Re-throw file size errors as-is
       } else {
         throw new Error(`Failed to improve PDF: ${error.message}`)
       }
@@ -147,3 +305,4 @@ Make sure to include both sections clearly separated by the markers.`
     }
   }
 }
+

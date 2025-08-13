@@ -17,10 +17,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
+    
     if (file && file.type === 'application/pdf') {
+      // Check file size (2GB limit with Files API)
+      const maxFileSize = 2 * 1024 * 1024 * 1024; // 2GB
+      if (file.size > maxFileSize) {
+        alert(`File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds the 2GB limit. Please choose a smaller PDF file or split it into smaller documents.`);
+        // Clear the input
+        event.target.value = '';
+        return;
+      }
       onFileUpload(file)
     } else if (file) {
       alert('Please select a PDF file.')
+      // Clear the input
+      event.target.value = '';
     }
   }
 
@@ -46,6 +57,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const file = files[0]
     
     if (file && file.type === 'application/pdf') {
+      // Check file size (2GB limit with Files API)
+      const maxFileSize = 2 * 1024 * 1024 * 1024; // 2GB
+      if (file.size > maxFileSize) {
+        alert(`File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds the 2GB limit. Please choose a smaller PDF file or split it into smaller documents.`);
+        return;
+      }
       onFileUpload(file)
     } else if (file) {
       alert('Please select a PDF file.')
@@ -89,7 +106,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             <p>
               <strong>Click to select</strong> or drag and drop your PDF file here
             </p>
-            <small>Only PDF files are supported</small>
+            <small>Only PDF files are supported (max 2GB)</small>
           </div>
         )}
       </div>

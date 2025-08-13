@@ -258,7 +258,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### **Compatibility**
 - Modern browsers with ES6+ support required
 - PDF files should be text-based (not pure images)
-- Large PDF files may take longer to process
+- **Large PDF files supported up to 2GB** (auto-optimized processing)
+- Small files (< 15MB): Direct processing for speed
+- Large files (15MB - 2GB): Advanced Files API processing
 
 ---
 
@@ -276,9 +278,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Ensure billing is enabled for your Google Cloud project
 
 **"Processing takes too long"**
-- Large PDFs require more processing time
-- Check your internet connection
-- Consider splitting large documents
+- Large PDFs (15MB+) use Files API and require more processing time
+- Files up to 2GB are supported with extended processing
+- Check your internet connection for file uploads
+- Monitor browser console for detailed progress logs
+- Consider splitting extremely large documents (> 1GB) for faster processing
 
 ### **Getting Help**
 
