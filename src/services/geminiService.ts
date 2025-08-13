@@ -7,6 +7,11 @@ export interface GeminiResult {
   improvedText: string
 }
 
+// Type for generative part (Files API or base64)
+type GenerativePart = 
+  | { fileData: { fileUri: string; mimeType: string } }
+  | { inlineData: { data: string; mimeType: string } };
+
 const languageNames: Record<Language, string> = {
   english: 'English',
   german: 'German',
@@ -33,39 +38,66 @@ const languageNames: Record<Language, string> = {
 const uploadLargeFile = async (file: File, apiKey: string) => {
   console.log(`Uploading large file (${(file.size / 1024 / 1024).toFixed(1)}MB) to Files API...`);
   
-  // Create form data for multipart upload
-  const formData = new FormData();
-  
-  // Add metadata
-  const metadata = {
-    file: {
-      displayName: file.name,
-      mimeType: file.type
-    }
-  };
-  
-  formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  formData.append('data', file);
-
   try {
-    const uploadResponse = await fetch(
+    // Step 1: Create the upload session
+    const startUploadResponse = await fetch(
       `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`,
       {
         method: 'POST',
-        body: formData,
+        headers: {
+          'X-Goog-Upload-Protocol': 'resumable',
+          'X-Goog-Upload-Command': 'start',
+          'X-Goog-Upload-Header-Content-Length': file.size.toString(),
+          'X-Goog-Upload-Header-Content-Type': file.type,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          file: {
+            display_name: file.name,
+            mime_type: file.type
+          }
+        })
       }
     );
 
+    if (!startUploadResponse.ok) {
+      const errorText = await startUploadResponse.text();
+      console.error('Failed to start upload session:', errorText);
+      throw new Error(`Failed to start upload: ${startUploadResponse.status} ${startUploadResponse.statusText}`);
+    }
+
+    const uploadUrl = startUploadResponse.headers.get('X-Goog-Upload-URL');
+    if (!uploadUrl) {
+      throw new Error('No upload URL received from Files API');
+    }
+
+    console.log('Upload session started, uploading file...');
+
+    // Step 2: Upload the file data
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Length': file.size.toString(),
+        'X-Goog-Upload-Offset': '0',
+        'X-Goog-Upload-Command': 'upload, finalize',
+      },
+      body: file
+    });
+
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
-      console.error('Files API upload error:', errorText);
-      throw new Error(`Files API upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+      console.error('File upload failed:', errorText);
+      throw new Error(`File upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
     }
 
     const uploadResult = await uploadResponse.json();
-    console.log('File uploaded successfully:', uploadResult.file.name);
+    console.log('File uploaded successfully:', uploadResult.file?.name);
     
-    // Wait for the file to be processed
+    if (!uploadResult.file?.name) {
+      throw new Error('Invalid upload response: missing file information');
+    }
+
+    // Step 3: Wait for the file to be processed
     let fileState = 'PROCESSING';
     let attempts = 0;
     const maxAttempts = 60; // 5 minutes max wait time
@@ -73,22 +105,30 @@ const uploadLargeFile = async (file: File, apiKey: string) => {
     while (fileState === 'PROCESSING' && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
       
-      const statusResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/${uploadResult.file.name}?key=${apiKey}`
-      );
-      
-      if (statusResponse.ok) {
-        const statusResult = await statusResponse.json();
-        fileState = statusResult.state;
-        console.log(`File processing state: ${fileState}`);
+      try {
+        const statusResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/${uploadResult.file.name}?key=${apiKey}`
+        );
+        
+        if (statusResponse.ok) {
+          const statusResult = await statusResponse.json();
+          fileState = statusResult.state;
+          console.log(`File processing state: ${fileState} (attempt ${attempts + 1})`);
+        } else {
+          console.warn(`Status check failed: ${statusResponse.status}`);
+        }
+      } catch (statusError) {
+        console.warn('Status check error:', statusError);
       }
       
       attempts++;
     }
     
     if (fileState !== 'ACTIVE') {
-      throw new Error(`File processing failed. Final state: ${fileState}`);
+      throw new Error(`File processing failed or timed out. Final state: ${fileState}`);
     }
+
+    console.log('File processed and ready for use');
     
     return {
       fileData: {
@@ -210,11 +250,17 @@ Please format your response EXACTLY like this:
 
 Make sure to include both sections clearly separated by the markers.`
 
-    console.log('Converting PDF to base64...')
-    // Convert PDF to base64 for Gemini
-    let imagePart: any;
+    console.log('Converting PDF for processing...')
+    // Convert PDF to appropriate format for Gemini
+    let imagePart: GenerativePart;
+    let uploadedFileUri: string | null = null;
+    
     try {
       imagePart = await fileToGenerativePart(pdfFile, apiKey)
+      // Store file URI for cleanup if it's from Files API
+      if ('fileData' in imagePart) {
+        uploadedFileUri = imagePart.fileData.fileUri;
+      }
     } catch (uploadError) {
       throw new Error(`File processing failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
     }
@@ -237,6 +283,24 @@ Make sure to include both sections clearly separated by the markers.`
         const text = response.text()
 
         console.log('Received response from Gemini API')
+
+        // Cleanup uploaded file if it was from Files API
+        if (uploadedFileUri) {
+          try {
+            console.log('Cleaning up uploaded file...');
+            const deleteResponse = await fetch(
+              `${uploadedFileUri}?key=${apiKey}`,
+              { method: 'DELETE' }
+            );
+            if (deleteResponse.ok) {
+              console.log('File cleanup successful');
+            } else {
+              console.warn('File cleanup failed, but processing completed');
+            }
+          } catch (cleanupError) {
+            console.warn('File cleanup error (non-critical):', cleanupError);
+          }
+        }
 
         // Parse the response to extract original and improved text
         const originalMatch = text.match(/===ORIGINAL_TEXT===\s*([\s\S]*?)\s*===IMPROVED_TEXT===/)?.[1]?.trim()
@@ -272,6 +336,16 @@ Make sure to include both sections clearly separated by the markers.`
           console.log(`Retrying in ${delay}ms...`)
           await new Promise(resolve => setTimeout(resolve, delay))
         }
+      }
+    }
+    
+    // Cleanup on failure
+    if (uploadedFileUri) {
+      try {
+        console.log('Cleaning up uploaded file after failure...');
+        await fetch(`${uploadedFileUri}?key=${apiKey}`, { method: 'DELETE' });
+      } catch (cleanupError) {
+        console.warn('File cleanup error:', cleanupError);
       }
     }
     
