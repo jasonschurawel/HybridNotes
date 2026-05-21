@@ -1,4 +1,4 @@
-# HybridNotes: Bridge Your Paper Notes to Digital Brain
+# HybridNotes: Semantic Structuring for Handwritten Notes
 
 ![HybridNotes Logo](hybridnotes_logo.png)
 
