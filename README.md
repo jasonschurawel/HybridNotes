@@ -1,305 +1,57 @@
-# 🧠 HybridNotes - Bridge Your Paper Notes to Digital Brain
+# HybridNotes: Bridge Your Paper Notes to Digital Brain
 
-**Transform your handwritten PDF notes into structured, enhanced digital knowledge with multilingual support.**
+HybridNotes is a modern React/TypeScript application that transforms handwritten or scanned PDF notes into structured, semantic Markdown. Unlike traditional OCR tools that output chaotic, raw text, this platform utilizes context-aware linguistic processing to clean up formatting anomalies and restructure content for direct integration into personal knowledge graphs like Obsidian, Notion, or Roam Research.
 
-🌐 **[Use it now online](https://jasonschurawel.github.io/HybridNotes)** - No installation required!
-
-HybridNotes is a modern React TypeScript application that bridges the gap between traditional paper note-taking and digital knowledge management. Upload your PDF notes, select your preferred language, and watch them transform into well-structured, searchable digital content that integrates seamlessly into your digital brain workflow.
+🌐 **[Launch Live Application](https://jasonschurawel.github.io/HybridNotes)** (Zero installation required)
 
 ---
 
-## 🎯 **The Problem We Solve**
+## Core Architecture
 
-Many knowledge workers, students, and researchers face the challenge of converting their handwritten or scanned PDF notes into usable digital formats. Traditional OCR solutions often produce messy, unstructured text that requires significant manual cleanup. HybridNotes solves this by:
+The platform operates on a privacy-first, serverless architecture that executes entirely within the client's browser. No document data or cryptographic keys are ever transmitted to external servers. 
 
-- **Intelligent Processing**: Understands context and meaning, not just extracting text
-- **Language Preservation**: Maintains your notes in German, English, French, or Russian with natural language enhancement
-- **Structure Enhancement**: Transforms chaotic handwritten notes into well-organized, markdown-formatted content
-- **Customizable Output**: Adapts to your specific needs with custom instructions and multiple export formats
+The underlying processing core natively handles multilingual workflows for English, German, French, and Russian, applying grammar corrections and academic formatting standards. For optimal performance, the system dynamically adapts to file sizes: standard documents under 15 Megabytes use direct streaming, while heavy payloads up to 2 Gigabytes are managed via automated file-chunking pipelines.
 
 ---
 
-## ✨ **Key Features**
+## Quick Start & Local Setup
 
-### 🤖 **Smart Enhancement**
-- Advanced PDF processing with intelligent text improvement
-- Context-aware note enhancement and restructuring
-- Custom instructions for personalized output
+The production build is fully optimized for immediate browser execution. Users only need to input their local API credentials, configure the target language, and drop the PDF into the interface.
 
-### 🌐 **Multilingual Support**
-- **English** 🇺🇸 - Professional and academic formatting
-- **German** 🇩🇪 - Native German language processing
-- **French** 🇫🇷 - Proper French academic and business formatting
-- **Russian** 🇷🇺 - Cyrillic text processing and enhancement
+To modify, extend, or run the codebase in a local development environment, execute the following routine:
 
-### 📁 **Flexible Export Options**
-- **Save as .txt** - Plain text for universal compatibility
-- **Save as .md** - Markdown for note-taking apps (Obsidian, Notion, etc.)
-- **Mirror .pdf with .md** - Creates matching .md file with same name as original PDF
-
-### 🎨 **Modern User Experience**
-- Drag-and-drop PDF upload
-- Real-time preview and editing
-- Responsive design for all devices
-- Privacy-first approach (API key stored locally)
-
----
-
-## 🚀 **Quick Start**
-
-### 🌐 **Use Online (Recommended)**
-
-**Ready to use immediately - no installation required!**
-
-Visit the live application: **[jasonschurawel.github.io/HybridNotes](https://jasonschurawel.github.io/HybridNotes)**
-
-✅ **Instant access** - works directly in your browser  
-✅ **No setup required** - just visit the link and start using  
-✅ **Always up-to-date** - automatically updated with latest features  
-✅ **Cross-platform** - works on Windows, Mac, Linux, mobile devices  
-✅ **Secure** - your files and API key stay in your browser (nothing uploaded to servers)  
-
-Simply:
-1. 🔗 **Visit** [jasonschurawel.github.io/HybridNotes](https://jasonschurawel.github.io/HybridNotes)
-2. 🔑 **Enter your API key** ([Get one here](https://makersuite.google.com/app/apikey))
-3. 📄 **Upload your PDF** and transform your notes!
-
----
-
-### 🛠️ **Local Development Setup**
-
-Want to modify the code or run it locally? Follow these steps:
-
-### Prerequisites
-- Node.js (version 18 or higher)
-- API key for text processing ([Get one here](https://makersuite.google.com/app/apikey))
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/hybridnotes.git
-   cd hybridnotes
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:5173` (or the port shown in terminal)
-
----
-
-## 📖 **How to Use**
-
-### 1. **Setup**
-- Enter your API key for text processing
-- Select your preferred output language
-- Add any specific instructions for note processing
-
-### 2. **Upload & Process**
-- Drag and drop your PDF file or click to upload
-- The system will analyze and enhance your notes automatically
-- Review the improved content in the preview
-
-### 3. **Export & Use**
-- Choose your export format (TXT, MD, or Mirror PDF)
-- Import into your digital note-taking system
-- Enjoy structured, searchable content
-
----
-
-## 🛠️ **Technology Stack**
-
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite for fast development
-- **Text Processing**: Advanced language processing for note enhancement
-- **PDF Processing**: PDF.js for reliable text extraction
-- **File Operations**: FileSaver.js for downloads
-- **Styling**: Modern CSS3 with glassmorphism design
-
----
-
-## 🎯 **Use Cases**
-
-### 📚 **Students**
-- Convert handwritten lecture notes to digital study materials
-- Create searchable archives of academic content
-- Prepare formatted notes for collaborative study
-
-### 🔬 **Researchers**
-- Digitize research notes and field observations
-- Structure interview transcripts and meeting notes
-- Create reference materials for publications
-
-### 💼 **Professionals**
-- Transform meeting notes into actionable documents
-- Archive important handwritten records
-- Create searchable knowledge bases
-
-### 🧠 **Knowledge Workers**
-- Build personal knowledge management systems
-- Integrate with tools like Obsidian, Notion, or Roam
-- Create interconnected digital note networks
-
----
-
-## 🔧 **Advanced Configuration**
-
-### **Custom Instructions**
-Use the "Additional Context" field to provide specific instructions:
-```
-Focus on creating bullet-point summaries
-Emphasize key concepts for exam preparation
-Format as a study guide with clear sections
-Extract only action items and decisions
-```
-
-### **Language-Specific Processing**
-Each language option provides native processing:
-- **Grammar and style** corrections
-- **Cultural context** awareness
-- **Academic formatting** standards
-- **Professional terminology** usage
-
----
-
-## 📁 **Project Structure**
-
-```
-src/
-├── components/           # React components
-│   ├── PDFTranscriber.tsx     # Main orchestrator
-│   ├── FileUpload.tsx         # Drag-drop upload
-│   ├── TextPreview.tsx        # Content preview
-│   ├── APIKeyInput.tsx        # Secure API key input
-│   ├── LanguageSelector.tsx   # Language selection
-│   ├── AdditionalNotes.tsx    # Custom instructions
-│   └── SaveOptions.tsx        # Export options
-├── services/            # External integrations
-│   ├── geminiService.ts       # Text processing service
-│   └── pdfService.ts          # PDF processing
-└── assets/             # Static resources
-```
-
----
-
-## 🚀 **Development**
-
-### **Available Scripts**
 ```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run lint     # Run ESLint
+git clone [https://github.com/jasonschurawel/hybridnotes.git](https://github.com/jasonschurawel/hybridnotes.git)
+cd hybridnotes
+npm install
+npm run dev
 ```
+Once the local Vite server boots up, the development environment is accessible at `http://localhost:5173`.
 
-### **Build for Production**
+---
+
+## Directory & Script Mapping
+
+The repository isolates presentation layers from the core extraction engines. The user interface is orchestrated by `PDFTranscriber.tsx`, supported by independent modules for file uploads, markdown previews, local credential encryption, and file serialization. The underlying translation and parsing logic is strictly separated into dedicated service layers for LLM prompt engineering and PDF.js extraction.
+
+Project lifecycles and compilation pipelines are governed by standard automation scripts:
+
 ```bash
-npm run build
+npm run build    # Compiles and optimizes assets into the /dist folder
+npm run preview  # Locally serves the production-ready build
+npm run lint     # Executes syntax and code quality validation
 ```
-Built files will be in the `dist/` directory, ready for deployment.
 
 ---
 
-## 🤝 **Contributing**
+## Troubleshooting & Advanced Prompts
 
-We welcome contributions! Here's how to get started:
+Advanced layout tuning can be achieved directly through the interface by passing explicit commands to the processing engine. The system natively parses behavioral instructions, such as requests to isolate technical terminology into an index or extract action items into structured checkboxes.
 
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes**
-4. **Commit with descriptive messages**
-   ```bash
-   git commit -m 'Add amazing feature for better note processing'
-   ```
-5. **Push to your branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-6. **Open a Pull Request**
-
-### **Development Guidelines**
-- Follow TypeScript best practices
-- Write meaningful commit messages
-- Add comments for complex logic
-- Test with different PDF types and languages
+If the system refuses a document, ensure the source file is unencrypted and free of password profiles. For massive files near the 2 Gigabyte limit, ensure your network connection remains stable during processing and monitor the browser console logs for real-time heartbeat metrics and performance indicators.
 
 ---
 
-## 📄 **License**
+## License & Roadmap
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## ⚠️ **Important Notes**
-
-### **API Usage & Costs**
-- Text processing API usage may incur costs based on your usage
-- Monitor your API usage in [Google Cloud Console](https://console.cloud.google.com/)
-- Free tier available for moderate usage
-
-### **Privacy & Security**
-- Your API key is stored locally in your browser
-- PDF files are processed securely through the processing API
-- No data is stored on our servers
-
-### **Compatibility**
-- Modern browsers with ES6+ support required
-- PDF files should be text-based (not pure images)
-- **Large PDF files supported up to 2GB** (auto-optimized processing)
-- Small files (< 15MB): Direct processing for speed
-- Large files (15MB - 2GB): Advanced Files API processing
-
----
-
-## 🆘 **Troubleshooting**
-
-### **Common Issues**
-
-**"Failed to process PDF"**
-- Check if PDF is password-protected
-- Try with a smaller PDF file first
-
-**"API Key Invalid"**
-- Verify your API key is correct
-- Check API key permissions in Google Cloud Console
-- Ensure billing is enabled for your Google Cloud project
-
-**"Processing takes too long"**
-- Large PDFs (15MB+) use Files API and require more processing time
-- Files up to 2GB are supported with extended processing
-- Check your internet connection for file uploads
-- Monitor browser console for detailed progress logs
-- Consider splitting extremely large documents (> 1GB) for faster processing
-
-### **Getting Help**
-
-1. **Check the browser console** for detailed error messages
-2. **Verify your setup** using the troubleshooting steps above
-3. **Open an issue** on GitHub with:
-   - Browser and OS information
-   - Error messages from console
-   - Steps to reproduce the problem
-
----
-
-## 🔮 **Future Roadmap**
-
-- [ ] **Offline processing capabilities** for independence, security and confidential data
-- [ ] **Support for multiple API Services** (not only Google...)
-
----
-
-**Transform your notes. Enhance your knowledge. Bridge the gap between paper and digital.**
+Distributed under the MIT Open Source License. Future updates focus on complete client-side offline processing for confidential or air-gapped workflows, alongside a modular provider layer to support alternative local Large Language Model backends.
