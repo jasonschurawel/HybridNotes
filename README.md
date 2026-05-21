@@ -1,5 +1,7 @@
 # HybridNotes: Bridge Your Paper Notes to Digital Brain
 
+![HybridNotes Logo](hybridnotes_logo.jpg)
+
 HybridNotes is a modern React/TypeScript application that transforms handwritten or scanned PDF notes into structured, semantic Markdown. Unlike traditional OCR tools that output chaotic, raw text, this platform utilizes context-aware linguistic processing to clean up formatting anomalies and restructure content for direct integration into personal knowledge graphs like Obsidian, Notion, or Roam Research.
 
 🌐 **[Launch Live Application](https://jasonschurawel.github.io/HybridNotes)** (Zero installation required)
